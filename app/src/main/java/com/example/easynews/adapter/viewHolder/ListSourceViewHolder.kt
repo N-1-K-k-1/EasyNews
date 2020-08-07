@@ -12,6 +12,10 @@ class ListSourceViewHolder(itemView : View) : RecyclerView.ViewHolder(itemView),
 
     var sourceTitle: TextView = itemView.source_news_name
 
+    init {
+        itemView.setOnClickListener(this)
+    }
+
     fun setItemClickListener(itemClickListener: ItemClickListener) {
         this.itemClickListener = itemClickListener
     }
