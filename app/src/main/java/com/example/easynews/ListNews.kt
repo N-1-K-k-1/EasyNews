@@ -2,6 +2,7 @@ package com.example.easynews
 
 import android.app.AlertDialog
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -15,6 +16,7 @@ import kotlinx.android.synthetic.main.activity_list_news.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+
 
 class ListNews : AppCompatActivity() {
 
@@ -55,18 +57,18 @@ class ListNews : AppCompatActivity() {
             dialog.show()
             mService.getNewsFromSource(Common.getNewsAPI(source!!))
                 .enqueue(object : Callback<News> {
-                    override fun onFailure(call : Call<News>, t : Throwable) {
+                    override fun onFailure(call : Call<News>?, t : Throwable) {
                         Toast.makeText(baseContext, "Failed to load", Toast.LENGTH_SHORT).show()
 
                         dialog.dismiss()
                     }
 
-                    override fun onResponse(call : Call<News>, response : Response<News>) {
+                    override fun onResponse(call: Call<News>?, response: Response<News>?) {
                         dialog.dismiss()
 
                         // Get first article to hot news
                         Picasso.get()
-                            .load(response.body()!!.articles!![0].urlToImage)
+                            .load(response!!.body()!!.articles!![0].urlToImage)
                             .into(top_image)
 
                         top_title.text = response.body()!!.articles!![0].title
@@ -78,7 +80,7 @@ class ListNews : AppCompatActivity() {
                         val firstItemRemoved = response.body()!!.articles
                         firstItemRemoved!!.removeAt(0)
 
-                        adapter = ListNewsAdapter(applicationContext , firstItemRemoved)
+                        adapter = ListNewsAdapter(baseContext, firstItemRemoved)
                         adapter.notifyDataSetChanged()
                         list_news.adapter = adapter
                     }
@@ -89,16 +91,17 @@ class ListNews : AppCompatActivity() {
             swipe_to_refresh.isRefreshing = true
             mService.getNewsFromSource(Common.getNewsAPI(source!!))
                 .enqueue(object : Callback<News> {
-                    override fun onFailure(call : Call<News>, t : Throwable) {
+                    override fun onFailure(call : Call<News>?, t : Throwable) {
                         Toast.makeText(baseContext, "Failed to load", Toast.LENGTH_SHORT).show()
                     }
 
-                    override fun onResponse(call : Call<News>, response : Response<News>) {
+                    override fun onResponse(call: Call<News>?, response: Response<News>?) {
                         swipe_to_refresh.isRefreshing = false
+
 
                         // Get first article to hot news
                         Picasso.get()
-                            .load(response.body()!!.articles!![0].urlToImage)
+                            .load(response!!.body()!!.articles!![0].urlToImage)
                             .into(top_image)
 
                         top_title.text = response.body()!!.articles!![0].title

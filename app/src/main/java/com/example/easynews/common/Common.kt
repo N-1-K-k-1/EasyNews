@@ -12,6 +12,8 @@ object Common {
     fun getNewsAPI(source: String): String {
         return StringBuilder("https://newsapi.org/v2/top-headlines?sources=")
             .append(source)
+            .append("&")
+            .append("apikey=")
             .append(API_KEY)
             .toString()
     }
