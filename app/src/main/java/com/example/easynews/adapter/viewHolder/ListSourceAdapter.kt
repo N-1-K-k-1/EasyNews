@@ -1,4 +1,4 @@
-package com.example.easynews.adapter
+package com.example.easynews.adapter.viewHolder
 
 import android.content.Context
 import android.view.LayoutInflater

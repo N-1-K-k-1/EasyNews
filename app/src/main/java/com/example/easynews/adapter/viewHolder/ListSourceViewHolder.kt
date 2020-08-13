@@ -6,7 +6,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.easynews.`interface`.ItemClickListener
 import kotlinx.android.synthetic.main.source_news.view.*
 
-class ListSourceViewHolder(itemView : View) : RecyclerView.ViewHolder(itemView), View.OnClickListener {
+class ListSourceViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView), View.OnClickListener {
 
     private lateinit var  itemClickListener: ItemClickListener
 

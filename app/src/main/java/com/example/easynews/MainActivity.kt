@@ -6,7 +6,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.easynews.`interface`.NewsService
-import com.example.easynews.adapter.ListSourceAdapter
+import com.example.easynews.adapter.viewHolder.ListSourceAdapter
 import com.example.easynews.common.Common
 import com.example.easynews.model.WebSite
 import com.google.gson.Gson
@@ -15,7 +15,6 @@ import io.paperdb.Paper
 import kotlinx.android.synthetic.main.activity_main.*
 import retrofit2.Call
 import retrofit2.Response
-import javax.security.auth.callback.Callback
 
 class MainActivity : AppCompatActivity() {
     lateinit var layoutManager: LinearLayoutManager
@@ -55,7 +54,11 @@ class MainActivity : AppCompatActivity() {
             if (cache != null && !cache.isBlank() && cache != "null")
             {
                 val webSite = Gson().fromJson<WebSite>(cache, WebSite::class.java)
-                adapter = ListSourceAdapter(baseContext, webSite)
+                adapter =
+                    ListSourceAdapter(
+                        baseContext,
+                        webSite
+                    )
                 adapter.notifyDataSetChanged()
                 recycler_view_source_news.adapter = adapter
             }
@@ -64,7 +67,12 @@ class MainActivity : AppCompatActivity() {
                 dialog.show()
                 mService.sources.enqueue(object : retrofit2.Callback<WebSite> {
                     override fun onResponse(call : Call<WebSite>, response : Response<WebSite>) {
-                        adapter = response.body()?.let { ListSourceAdapter(baseContext, it) }!!
+                        adapter = response.body()?.let {
+                            ListSourceAdapter(
+                                baseContext,
+                                it
+                            )
+                        }!!
                         adapter.notifyDataSetChanged()
                         recycler_view_source_news.adapter = adapter
 
@@ -87,7 +95,12 @@ class MainActivity : AppCompatActivity() {
             // Fetch new data
             mService.sources.enqueue(object : retrofit2.Callback<WebSite> {
                 override fun onResponse(call : Call<WebSite>, response : Response<WebSite>) {
-                    adapter = response.body()?.let { ListSourceAdapter(baseContext, it) }!!
+                    adapter = response.body()?.let {
+                        ListSourceAdapter(
+                            baseContext,
+                            it
+                        )
+                    }!!
                     adapter.notifyDataSetChanged()
                     recycler_view_source_news.adapter = adapter
 
