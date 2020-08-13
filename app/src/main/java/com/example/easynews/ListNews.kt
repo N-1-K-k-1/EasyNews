@@ -13,6 +13,8 @@ import com.example.easynews.model.News
 import com.squareup.picasso.Picasso
 import dmax.dialog.SpotsDialog
 import kotlinx.android.synthetic.main.activity_list_news.*
+import kotlinx.android.synthetic.main.activity_list_news.swipe_to_refresh
+import kotlinx.android.synthetic.main.activity_main.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -54,6 +56,40 @@ class ListNews : AppCompatActivity() {
 
     private fun loadNews(source: String?, isRefreshed: Boolean) {
         if (isRefreshed) {
+            swipe_to_refresh.isRefreshing = true
+            mService.getNewsFromSource(Common.getNewsAPI(source!!))
+                .enqueue(object : Callback<News> {
+                    override fun onFailure(call : Call<News>?, t : Throwable) {
+                        Toast.makeText(baseContext, "Failed to load", Toast.LENGTH_SHORT).show()
+
+                        swipe_to_refresh.isRefreshing = false
+                    }
+
+                    override fun onResponse(call: Call<News>?, response: Response<News>?) {
+                        // Get first article to hot news
+                        Picasso.get()
+                            .load(response!!.body()!!.articles!![0].urlToImage)
+                            .into(top_image)
+
+                        top_title.text = response.body()!!.articles!![0].title
+                        top_author.text = response.body()!!.articles!![0].author
+
+                        webHotUrl = response.body()!!.articles!![0].url
+
+                        // Load all articles that remains
+                        val firstItemRemoved = response.body()!!.articles
+                        firstItemRemoved!!.removeAt(0)
+
+                        adapter = ListNewsAdapter(baseContext, firstItemRemoved)
+                        adapter.notifyDataSetChanged()
+                        list_news.adapter = adapter
+
+                        swipe_to_refresh.isRefreshing = false
+                    }
+
+                })
+        }
+        else {
             dialog.show()
             mService.getNewsFromSource(Common.getNewsAPI(source!!))
                 .enqueue(object : Callback<News> {
@@ -64,58 +100,25 @@ class ListNews : AppCompatActivity() {
                     }
 
                     override fun onResponse(call: Call<News>?, response: Response<News>?) {
+                        // Get first article to hot news
+                        Picasso.get()
+                            .load(response!!.body()!!.articles!![0].urlToImage)
+                            .into(top_image)
+
+                        top_title.text = response.body()!!.articles!![0].title
+                        top_author.text = response.body()!!.articles!![0].author
+
+                        webHotUrl = response.body()!!.articles!![0].url
+
+                        // Load all articles that remains
+                        val firstItemRemoved = response.body()!!.articles
+                        firstItemRemoved!!.removeAt(0)
+
+                        adapter = ListNewsAdapter(baseContext, firstItemRemoved)
+                        adapter.notifyDataSetChanged()
+                        list_news.adapter = adapter
+
                         dialog.dismiss()
-
-                        // Get first article to hot news
-                        Picasso.get()
-                            .load(response!!.body()!!.articles!![0].urlToImage)
-                            .into(top_image)
-
-                        top_title.text = response.body()!!.articles!![0].title
-                        top_author.text = response.body()!!.articles!![0].author
-
-                        webHotUrl = response.body()!!.articles!![0].url
-
-                        // Load all articles that remains
-                        val firstItemRemoved = response.body()!!.articles
-                        firstItemRemoved!!.removeAt(0)
-
-                        adapter = ListNewsAdapter(baseContext, firstItemRemoved)
-                        adapter.notifyDataSetChanged()
-                        list_news.adapter = adapter
-                    }
-
-                })
-        }
-        else {
-            swipe_to_refresh.isRefreshing = true
-            mService.getNewsFromSource(Common.getNewsAPI(source!!))
-                .enqueue(object : Callback<News> {
-                    override fun onFailure(call : Call<News>?, t : Throwable) {
-                        Toast.makeText(baseContext, "Failed to load", Toast.LENGTH_SHORT).show()
-                    }
-
-                    override fun onResponse(call: Call<News>?, response: Response<News>?) {
-                        swipe_to_refresh.isRefreshing = false
-
-
-                        // Get first article to hot news
-                        Picasso.get()
-                            .load(response!!.body()!!.articles!![0].urlToImage)
-                            .into(top_image)
-
-                        top_title.text = response.body()!!.articles!![0].title
-                        top_author.text = response.body()!!.articles!![0].author
-
-                        webHotUrl = response.body()!!.articles!![0].url
-
-                        // Load all articles that remains
-                        val firstItemRemoved = response.body()!!.articles
-                        firstItemRemoved!!.removeAt(0)
-
-                        adapter = ListNewsAdapter(baseContext, firstItemRemoved)
-                        adapter.notifyDataSetChanged()
-                        list_news.adapter = adapter
                     }
 
                 })

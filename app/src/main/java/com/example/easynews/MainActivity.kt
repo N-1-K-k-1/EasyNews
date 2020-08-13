@@ -33,9 +33,7 @@ class MainActivity : AppCompatActivity() {
         mService = Common.newsService
 
         /* View */
-        swipe_to_refresh.setOnRefreshListener {
-            loadWebSiteSource(true)
-        }
+        swipe_to_refresh.setOnRefreshListener { loadWebSiteSource(true) }
 
         recycler_view_source_news.setHasFixedSize(true)
         layoutManager = LinearLayoutManager(this)
@@ -46,7 +44,7 @@ class MainActivity : AppCompatActivity() {
         loadWebSiteSource(false)
     }
 
-    private fun loadWebSiteSource(isRefreshed : Boolean) {
+    private fun loadWebSiteSource(isRefreshed: Boolean) {
 
         // If not refreshed, then read cache, else load website and write cache
         if (!isRefreshed) {
@@ -66,7 +64,7 @@ class MainActivity : AppCompatActivity() {
             {
                 dialog.show()
                 mService.sources.enqueue(object : retrofit2.Callback<WebSite> {
-                    override fun onResponse(call : Call<WebSite>, response : Response<WebSite>) {
+                    override fun onResponse(call: Call<WebSite>, response: Response<WebSite>) {
                         adapter = response.body()?.let {
                             ListSourceAdapter(
                                 baseContext,
@@ -81,7 +79,7 @@ class MainActivity : AppCompatActivity() {
                         dialog.dismiss()
                     }
 
-                    override fun onFailure(call : Call<WebSite>, t : Throwable) {
+                    override fun onFailure(call: Call<WebSite>, t: Throwable) {
                         Toast.makeText(baseContext, "Failed to load", Toast.LENGTH_SHORT).show()
 
                         dialog.dismiss()
@@ -94,7 +92,7 @@ class MainActivity : AppCompatActivity() {
             swipe_to_refresh.isRefreshing = true
             // Fetch new data
             mService.sources.enqueue(object : retrofit2.Callback<WebSite> {
-                override fun onResponse(call : Call<WebSite>, response : Response<WebSite>) {
+                override fun onResponse(call: Call<WebSite>, response: Response<WebSite>) {
                     adapter = response.body()?.let {
                         ListSourceAdapter(
                             baseContext,
@@ -111,6 +109,8 @@ class MainActivity : AppCompatActivity() {
 
                 override fun onFailure(call : Call<WebSite>, t : Throwable) {
                     Toast.makeText(baseContext, "Failed to load", Toast.LENGTH_SHORT).show()
+
+                    swipe_to_refresh.isRefreshing = false
                 }
             })
         }
