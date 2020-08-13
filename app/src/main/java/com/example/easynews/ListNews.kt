@@ -1,9 +1,9 @@
 package com.example.easynews
 
 import android.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.easynews.`interface`.NewsService
 import com.example.easynews.adapter.viewHolder.ListNewsAdapter
@@ -78,7 +78,7 @@ class ListNews : AppCompatActivity() {
                         val firstItemRemoved = response.body()!!.articles
                         firstItemRemoved!!.removeAt(0)
 
-                        adapter = ListNewsAdapter(baseContext, firstItemRemoved)
+                        adapter = ListNewsAdapter(applicationContext , firstItemRemoved)
                         adapter.notifyDataSetChanged()
                         list_news.adapter = adapter
                     }
