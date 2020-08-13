@@ -17,8 +17,8 @@ import retrofit2.Call
 import retrofit2.Response
 
 class MainActivity : AppCompatActivity() {
-    lateinit var layoutManager: LinearLayoutManager
-    lateinit var mService: NewsService
+    private lateinit var layoutManager: LinearLayoutManager
+    private lateinit var mService: NewsService
     lateinit var adapter: ListSourceAdapter
     lateinit var dialog: AlertDialog
 

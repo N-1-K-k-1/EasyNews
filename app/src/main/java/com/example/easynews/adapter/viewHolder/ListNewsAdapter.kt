@@ -14,7 +14,7 @@ import java.text.ParseException
 import java.text.ParsePosition
 import java.util.*
 
-class ListNewsAdapter(private val context : Context, val articleList: List<Article>) : RecyclerView.Adapter<ListNewsViewHolder>() {
+class ListNewsAdapter(private val context : Context, private val articleList: MutableList<Article>) : RecyclerView.Adapter<ListNewsViewHolder>() {
     override fun onCreateViewHolder(parent : ViewGroup, viewType : Int) : ListNewsViewHolder {
         val inflater = LayoutInflater.from(parent.context)
         val itemView = inflater.inflate(R.layout.news_layout, parent, false)

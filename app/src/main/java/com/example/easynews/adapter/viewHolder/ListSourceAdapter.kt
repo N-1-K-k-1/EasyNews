@@ -1,14 +1,14 @@
 package com.example.easynews.adapter.viewHolder
 
 import android.content.Context
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
+import com.example.easynews.ListNews
 import com.example.easynews.R
 import com.example.easynews.`interface`.ItemClickListener
-import com.example.easynews.adapter.viewHolder.ListSourceViewHolder
 import com.example.easynews.model.WebSite
 
 class ListSourceAdapter(private val context: Context, private val webSite : WebSite) : RecyclerView.Adapter<ListSourceViewHolder>() {
@@ -27,7 +27,9 @@ class ListSourceAdapter(private val context: Context, private val webSite : WebS
         holder.sourceTitle.text = webSite.sources!![position].name
         holder.setItemClickListener(object : ItemClickListener {
             override fun onClick(view : View, position : Int) {
-                Toast.makeText(context, "Will be implemented", Toast.LENGTH_SHORT).show()
+                val intent = Intent(context, ListNews::class.java)
+                intent.putExtra("source", webSite.sources!![position].id)
+                context.startActivity(intent)
             }
         })
     }
