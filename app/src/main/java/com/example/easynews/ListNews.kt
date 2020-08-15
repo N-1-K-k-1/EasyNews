@@ -1,6 +1,8 @@
 package com.example.easynews
 
 import android.app.AlertDialog
+import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -41,7 +43,12 @@ class ListNews : AppCompatActivity() {
         swipe_to_refresh.setOnRefreshListener { loadNews(source, true) }
 
         diagonalLayout.setOnClickListener {
-            //soon
+            val detail = Intent(baseContext, NewsDetails::class.java)
+            detail.putExtra("webUrl", webHotUrl)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                detail.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            startActivity(detail)
         }
 
         list_news.setHasFixedSize(true)
