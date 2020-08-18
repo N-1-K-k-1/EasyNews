@@ -26,7 +26,6 @@ import retrofit2.Call
 import retrofit2.Response
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
-import java.lang.StringBuilder
 import com.example.easynews.common.CityDetect
 
 class MainActivity : AppCompatActivity() {
@@ -38,12 +37,14 @@ class MainActivity : AppCompatActivity() {
     private lateinit var toolbar: androidx.appcompat.app.ActionBar
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var cityDetect: CityDetect
-    private lateinit var city: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         supportRequestWindowFeature(Window.FEATURE_ACTION_BAR_OVERLAY)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        toolbar = supportActionBar!!
+        toolbar.isHideOnContentScrollEnabled = true
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
@@ -61,15 +62,15 @@ class MainActivity : AppCompatActivity() {
                 Manifest.permission.INTERNET
             ), 1)
         }
+
+        var cityName = ""
+
         fusedLocationClient.lastLocation
             .addOnSuccessListener { location: Location? ->
-                cityDetect = CityDetect(baseContext)
-                city = cityDetect.locateCity(location!!.latitude, location.longitude)
-                Log.d("Location", city)
+                cityDetect = CityDetect(baseContext, location!!.latitude, location.longitude)
+                if (cityDetect.getCityName() != "")
+                    toolbar.title = "Local news for ${cityDetect.getCityName()}"
             }
-        toolbar = supportActionBar!!
-        toolbar.title = "Local news"
-        toolbar.isHideOnContentScrollEnabled = true
 
         bottomNav = findViewById(R.id.navigationView)
         bottomNav.setOnNavigationItemSelectedListener(navListener)
@@ -96,8 +97,8 @@ class MainActivity : AppCompatActivity() {
         when (item.itemId) {
             R.id.navigation_local -> {
                 toolbar.title = "Local news"
-                if (city != "")
-                    toolbar.title = "Local news for $city"
+                if (CityDetect.city != "")
+                    toolbar.title = "Local news for ${CityDetect.city}"
                 return@OnNavigationItemSelectedListener  true
             }
             R.id.navigation_global -> {
