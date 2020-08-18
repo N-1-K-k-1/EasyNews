@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">EasyNews</string>
+    <string name="bookmarks">Bookmarks</string>
+    <string name="search">Search</string>
+    <string name="global_news">World news</string>
+    <string name="local_news">Local news</string>
 </resources>

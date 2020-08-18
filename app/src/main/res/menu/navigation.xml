@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/navigation_local"
+        android:enabled="true"
+        android:icon="@drawable/ic_baseline_location_on_24"
+        android:title="@string/local_news" />
+
+    <item
+        android:id="@+id/navigation_global"
+        android:enabled="true"
+        android:icon="@drawable/ic_baseline_language_24"
+        android:title="@string/global_news"/>
+
+    <item
+        android:id="@+id/navigation_search"
+        android:enabled="true"
+        android:icon="@drawable/ic_baseline_search_24"
+        android:title="@string/search"/>
+
+    <item
+        android:id="@+id/navigation_bookmarks"
+        android:enabled="true"
+        android:icon="@drawable/ic_baseline_bookmarks_24"
+        android:title="@string/bookmarks"/>
+</menu>
