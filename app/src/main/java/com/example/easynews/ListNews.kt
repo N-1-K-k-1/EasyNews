@@ -75,10 +75,8 @@ class ListNews : AppCompatActivity() {
                         Picasso.get()
                             .load(response!!.body()!!.articles!![0].urlToImage)
                             .into(top_image)
-
                         top_title.text = response.body()!!.articles!![0].title
                         top_author.text = response.body()!!.articles!![0].author
-
                         webHotUrl = response.body()!!.articles!![0].url
 
                         // Load all articles that remains
@@ -109,10 +107,8 @@ class ListNews : AppCompatActivity() {
                         Picasso.get()
                             .load(response!!.body()!!.articles!![0].urlToImage)
                             .into(top_image)
-
                         top_title.text = response.body()!!.articles!![0].title
                         top_author.text = response.body()!!.articles!![0].author
-
                         webHotUrl = response.body()!!.articles!![0].url
 
                         // Load all articles that remains

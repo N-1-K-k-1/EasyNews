@@ -1,79 +1,61 @@
 package com.example.easynews
 
-import android.Manifest
 import android.app.AlertDialog
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.location.Location
 import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.StrictMode
 import android.util.Log
-import android.view.Window
 import android.widget.Toast
-import androidx.core.app.ActivityCompat
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.easynews.`interface`.NewsService
-import com.example.easynews.adapter.viewHolder.ListSourceAdapter
+import com.example.easynews.adapter.viewHolder.ListNewsAdapter
 import com.example.easynews.common.Common
-import com.example.easynews.model.WebSite
+import com.example.easynews.common.GeoData
+import com.example.easynews.common.NoImage
+import com.example.easynews.model.News
+import com.example.easynews.network.CheckNetwork
+import com.example.easynews.network.GlobalVars
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.gson.Gson
+import com.squareup.picasso.Picasso
 import dmax.dialog.SpotsDialog
 import io.paperdb.Paper
 import kotlinx.android.synthetic.main.activity_main.*
 import retrofit2.Call
 import retrofit2.Response
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationServices
-import com.example.easynews.common.CityDetect
+import java.io.IOException
+import java.lang.Exception
+import java.net.URL
+
 
 class MainActivity : AppCompatActivity() {
+
+    var topUrl: String = ""
+    var exceptions: Array<String>? = null
+
     private lateinit var layoutManager: LinearLayoutManager
     private lateinit var mService: NewsService
-    lateinit var adapter: ListSourceAdapter
+    lateinit var adapter: ListNewsAdapter
     lateinit var dialog: AlertDialog
     private lateinit var bottomNav: BottomNavigationView
     private lateinit var toolbar: androidx.appcompat.app.ActionBar
-    private lateinit var fusedLocationClient: FusedLocationProviderClient
-    private lateinit var cityDetect: CityDetect
+    private lateinit var geoData: GeoData
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        supportRequestWindowFeature(Window.FEATURE_ACTION_BAR_OVERLAY)
+        supportRequestWindowFeature(AppCompatDelegate.FEATURE_SUPPORT_ACTION_BAR_OVERLAY)
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
 
-        toolbar = supportActionBar!!
-        toolbar.isHideOnContentScrollEnabled = true
+        /* Detect location and check permissions */
+        geoData = GeoData(this, savedInstanceState)
+        geoData.checkLocation()
 
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-
-        if (ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            requestPermissions(arrayOf(
-                Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.ACCESS_COARSE_LOCATION,
-                Manifest.permission.INTERNET
-            ), 1)
-        }
-
-        var cityName = ""
-
-        fusedLocationClient.lastLocation
-            .addOnSuccessListener { location: Location? ->
-                cityDetect = CityDetect(baseContext, location!!.latitude, location.longitude)
-                if (cityDetect.getCityName() != "")
-                    toolbar.title = "Local news for ${cityDetect.getCityName()}"
-            }
-
-        bottomNav = findViewById(R.id.navigationView)
-        bottomNav.setOnNavigationItemSelectedListener(navListener)
+        /* Check connection */
+        val network = CheckNetwork(this)
+        // Register NetworkCallback
+        network.registerNetworkCallback()
 
         /* Cache */
         Paper.init(this)
@@ -81,28 +63,56 @@ class MainActivity : AppCompatActivity() {
         /* Service */
         mService = Common.newsService
 
+        setContentView(R.layout.activity_main)
+
+        /* Bottom navigation */
+        bottomNav = findViewById(R.id.navigationView)
+        bottomNav.setOnNavigationItemSelectedListener(navListener)
+
+        /* Top action bar */
+        toolbar = supportActionBar!!
+    }
+
+    override fun onStart() {
+        super.onStart()
+        if (geoData.getCityName() != "")
+            toolbar.title = getString(R.string.local_news_for) + " " + geoData.getCityName()
+
+        toolbar.isHideOnContentScrollEnabled = true
+
         /* View */
         swipe_to_refresh.setOnRefreshListener { loadWebSiteSource(true) }
 
-        recycler_view_source_news.setHasFixedSize(true)
+        diagonalLayout.setOnClickListener {
+            val detail = Intent(baseContext, NewsDetails::class.java)
+            detail.putExtra("webUrl", topUrl)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                detail.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            startActivity(detail)
+        }
+
+        list_news.setHasFixedSize(true)
         layoutManager = LinearLayoutManager(this)
-        recycler_view_source_news.layoutManager = layoutManager
+        list_news.layoutManager = layoutManager
 
         dialog = SpotsDialog.Builder().setContext(this).build()
 
         loadWebSiteSource(false)
+
     }
 
     private val navListener = BottomNavigationView.OnNavigationItemSelectedListener {item ->
         when (item.itemId) {
             R.id.navigation_local -> {
-                toolbar.title = "Local news"
-                if (CityDetect.city != "")
-                    toolbar.title = "Local news for ${CityDetect.city}"
+                if (geoData.getCityName() != "")
+                    toolbar.title = getString(R.string.local_news_for) + " " + geoData.getCityName()
+                else
+                    toolbar.title = getString(R.string.local_news)
                 return@OnNavigationItemSelectedListener  true
             }
             R.id.navigation_global -> {
-                toolbar.title = "Global news"
+                toolbar.title = getString(R.string.global_news)
                 val globalIntent = Intent(baseContext, ListNews::class.java)
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                     globalIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -120,58 +130,130 @@ class MainActivity : AppCompatActivity() {
 
         // If not refreshed, then read cache, else load website and write cache
         if (!isRefreshed) {
+
+            GlobalVars.counter++
+
             val cache = Paper.book().read<String>("cache")
-            if (cache != null && !cache.isBlank() && cache != "null")
+
+            if (cache != null && !cache.isBlank() && cache != "null" && !GlobalVars.isNetworkConnected)
             {
-                val webSite = Gson().fromJson<WebSite>(cache, WebSite::class.java)
-                adapter =
-                    ListSourceAdapter(baseContext, webSite)
+                val news = Gson().fromJson<News>(cache, News::class.java)
+
+                Picasso.get().load(news.articles?.get(0)?.urlToImage).into(top_image)
+                top_title.text = news.articles?.get(0)?.title
+                top_author.text = news.articles?.get(0)?.author
+
+                val firstItemRemoved = news.articles
+                firstItemRemoved?.removeAt(0)
+
+                adapter = firstItemRemoved?.let { ListNewsAdapter(baseContext, it) }!!
                 adapter.notifyDataSetChanged()
-                recycler_view_source_news.adapter = adapter
+                list_news.adapter = adapter
             }
             else
             {
-                dialog.show()
-                mService.sources.enqueue(object : retrofit2.Callback<WebSite> {
-                    override fun onResponse(call: Call<WebSite>, response: Response<WebSite>) {
-                        adapter = response.body()?.let { ListSourceAdapter(baseContext, it) }!!
-                        adapter.notifyDataSetChanged()
-                        recycler_view_source_news.adapter = adapter
+                geoData.getCityName()?.let {
+                    mService.getLocalNews("$it OR ${it}е", geoData.getLanguage()).enqueue(
+                        object : retrofit2.Callback<News> {
+                            var i = 0
+                            override fun onResponse(call: Call<News>, response: Response<News>) {
+                                Paper.book().write("cache", Gson().toJson(response.body()!!))
+                                response.body()!!.articles?.forEach { it ->
+                                    try {
+                                        it.urlToImage?.let { it1 -> Log.e("Counter", it1) }
+                                        URL(it.urlToImage).readBytes()
+                                    } catch (e: Exception) {
+                                        println(e)
+                                        i++
+                                        it.isImage = false
+                                    }
+                                }
+                                Log.e("Counter", i.toString())
 
-                        Paper.book().write("cache", Gson().toJson(response.body()))
+                                Picasso.get()
+                                    .load(response.body()?.articles?.get(0)?.urlToImage)
+                                    .into(top_image)
 
-                        dialog.dismiss()
-                    }
+                                val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
+                                StrictMode.setThreadPolicy(policy)
 
-                    override fun onFailure(call: Call<WebSite>, t: Throwable) {
-                        Toast.makeText(baseContext, "Failed to load", Toast.LENGTH_SHORT).show()
+                                try {
+                                    URL(response.body()?.articles?.get(0)?.urlToImage).readBytes()
+                                } catch (e: IOException) {
+                                    Picasso.get().load(R.drawable.no_image_available).into(top_image)
+                                }
 
-                        dialog.dismiss()
-                    }
-                })
+                                top_title.text = response.body()!!.articles!![0].title
+                                top_author.text = response.body()!!.articles!![0].author
+                                topUrl = response.body()!!.articles!![0].url.toString()
+
+                                // Load all articles that remains
+                                val firstItemRemoved = response.body()!!.articles
+                                firstItemRemoved!!.removeAt(0)
+
+                                adapter = ListNewsAdapter(baseContext, firstItemRemoved)
+                                adapter.notifyDataSetChanged()
+                                list_news.adapter = adapter
+
+                                dialog.dismiss()
+                            }
+
+                            override fun onFailure(call: Call<News>, t: Throwable) {
+                                Toast.makeText(baseContext, "Failed to load", Toast.LENGTH_SHORT).show()
+
+                                dialog.dismiss()
+                            }
+                        }
+                    )
+                }
             }
         }
         else
         {
             swipe_to_refresh.isRefreshing = true
+
+            NoImage.data?.clear()
+
             // Fetch new data
-            mService.sources.enqueue(object : retrofit2.Callback<WebSite> {
-                override fun onResponse(call: Call<WebSite>, response: Response<WebSite>) {
-                    adapter = response.body()?.let { ListSourceAdapter(baseContext, it) }!!
-                    adapter.notifyDataSetChanged()
-                    recycler_view_source_news.adapter = adapter
+            geoData.getCityName()?.let {
+                mService.getLocalNews("$it OR ${it}е", geoData.getLanguage()).enqueue(
+                    object : retrofit2.Callback<News> {
+                        override fun onResponse(call: Call<News>, response: Response<News>) {
+                            Paper.book().write("cache", Gson().toJson(response.body()!!))
 
-                    Paper.book().write("cache", Gson().toJson(response.body()))
+                            Picasso.get()
+                                .load(response.body()?.articles?.get(0)?.urlToImage)
+                                .into(top_image)
 
-                    swipe_to_refresh.isRefreshing = false
-                }
+                            try {
+                                URL(response.body()?.articles?.get(0)?.urlToImage).readBytes()
+                            } catch (e: IOException) {
+                                Picasso.get().load(R.drawable.no_image_available).into(top_image)
+                            }
 
-                override fun onFailure(call : Call<WebSite>, t : Throwable) {
-                    Toast.makeText(baseContext, "Failed to load", Toast.LENGTH_SHORT).show()
+                            top_title.text = response.body()!!.articles!![0].title
+                            top_author.text = response.body()!!.articles!![0].author
+                            topUrl = response.body()!!.articles!![0].url.toString()
 
-                    swipe_to_refresh.isRefreshing = false
-                }
-            })
+                            val firstItemRemoved = response.body()!!.articles
+                            firstItemRemoved!!.removeAt(0)
+
+                            adapter = ListNewsAdapter(baseContext, firstItemRemoved)
+                            adapter.notifyDataSetChanged()
+                            list_news.adapter = adapter
+
+                            swipe_to_refresh.isRefreshing = false
+                        }
+
+                        override fun onFailure(call : Call<News>, t : Throwable) {
+                            Toast.makeText(baseContext, "Failed to load", Toast.LENGTH_SHORT).show()
+
+                            swipe_to_refresh.isRefreshing = false
+                        }
+                    }
+                )
+            }
         }
     }
+
 }

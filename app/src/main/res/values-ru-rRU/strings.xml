@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">EasyNews</string>
+    <string name="bookmarks">Закладки</string>
+    <string name="search">Поиск</string>
+    <string name="global_news">Мировые</string>
+    <string name="local_news">Местные</string>
+    <string name="local_news_for">Новости в городе</string>
+    <string name="settings">Настройки</string>
+    <string name="cancel">Отмена</string>
+    <string name="alert">Что-то пошло не так, пожалуйста, перезагрузите ваше устройство или отчистите кэш приложения</string>
+</resources>

@@ -5,7 +5,6 @@ import com.example.easynews.remote.RetrofitClient
 
 object Common {
     private const val BASE_URL = "https://newsapi.org/"
-    private const val API_KEY = "848c158751374e079db06e2de9191ad5"
 
     val newsService: NewsService = RetrofitClient.getClient(BASE_URL).create(NewsService::class.java)
 
@@ -13,8 +12,6 @@ object Common {
         return StringBuilder("https://newsapi.org/v2/top-headlines?sources=")
             .append(source)
             .append("&")
-            .append("apikey=")
-            .append(API_KEY)
             .toString()
     }
 }

@@ -1,7 +1,11 @@
 <resources>
     <string name="app_name">EasyNews</string>
-    <string name="bookmarks">Bookmarks</string>
+    <string name="bookmarks" >Bookmarks</string>
     <string name="search">Search</string>
     <string name="global_news">World news</string>
     <string name="local_news">Local news</string>
+    <string name="local_news_for">Local news for</string>
+    <string name="settings">Settings</string>
+    <string name="cancel">Cancel</string>
+    <string name="alert">Something went wrong, please, reboot your phone or clear the cache of the App</string>
 </resources>
