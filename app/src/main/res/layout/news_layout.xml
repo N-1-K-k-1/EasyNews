@@ -21,7 +21,7 @@
             android:scaleType="centerCrop"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:src="@drawable/no_image_available"/>
+            android:src="@drawable/no_image_available" />
 
         <LinearLayout
             android:orientation="vertical"

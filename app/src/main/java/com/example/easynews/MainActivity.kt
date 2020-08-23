@@ -2,20 +2,21 @@ package com.example.easynews
 
 import android.app.AlertDialog
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.os.StrictMode
-import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.easynews.`interface`.NewsService
 import com.example.easynews.adapter.viewHolder.ListNewsAdapter
 import com.example.easynews.common.Common
 import com.example.easynews.common.GeoData
-import com.example.easynews.common.NoImage
 import com.example.easynews.model.News
+import com.example.easynews.network.AsyncTask.executeAsyncTask
 import com.example.easynews.network.CheckNetwork
 import com.example.easynews.network.GlobalVars
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -27,14 +28,11 @@ import kotlinx.android.synthetic.main.activity_main.*
 import retrofit2.Call
 import retrofit2.Response
 import java.io.IOException
-import java.lang.Exception
 import java.net.URL
-
 
 class MainActivity : AppCompatActivity() {
 
     var topUrl: String = ""
-    var exceptions: Array<String>? = null
 
     private lateinit var layoutManager: LinearLayoutManager
     private lateinit var mService: NewsService
@@ -44,13 +42,34 @@ class MainActivity : AppCompatActivity() {
     private lateinit var toolbar: androidx.appcompat.app.ActionBar
     private lateinit var geoData: GeoData
 
+    private val navListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
+        when (item.itemId) {
+            R.id.navigation_local -> {
+                if (geoData.getCityName() != null)
+                    toolbar.title = getString(R.string.local_news_for) + " " + geoData.getCityName()
+                else
+                    toolbar.title = getString(R.string.local_news_for)
+
+                return@OnNavigationItemSelectedListener  true
+            }
+            R.id.navigation_global -> {
+                toolbar.title = getString(R.string.global_news)
+                val globalIntent = Intent(baseContext, ListNews::class.java)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                    globalIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                startActivity(globalIntent)
+                return@OnNavigationItemSelectedListener true
+            }
+            else -> {
+                false
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         supportRequestWindowFeature(AppCompatDelegate.FEATURE_SUPPORT_ACTION_BAR_OVERLAY)
         super.onCreate(savedInstanceState)
-
-        /* Detect location and check permissions */
-        geoData = GeoData(this, savedInstanceState)
-        geoData.checkLocation()
 
         /* Check connection */
         val network = CheckNetwork(this)
@@ -71,14 +90,11 @@ class MainActivity : AppCompatActivity() {
 
         /* Top action bar */
         toolbar = supportActionBar!!
-    }
 
-    override fun onStart() {
-        super.onStart()
-        if (geoData.getCityName() != "")
-            toolbar.title = getString(R.string.local_news_for) + " " + geoData.getCityName()
+        /* Detect location and check permissions */
+        geoData = GeoData(this, savedInstanceState)
+        geoData.checkLocation()
 
-        toolbar.isHideOnContentScrollEnabled = true
 
         /* View */
         swipe_to_refresh.setOnRefreshListener { loadWebSiteSource(true) }
@@ -99,31 +115,46 @@ class MainActivity : AppCompatActivity() {
         dialog = SpotsDialog.Builder().setContext(this).build()
 
         loadWebSiteSource(false)
-
     }
 
-    private val navListener = BottomNavigationView.OnNavigationItemSelectedListener {item ->
-        when (item.itemId) {
-            R.id.navigation_local -> {
-                if (geoData.getCityName() != "")
-                    toolbar.title = getString(R.string.local_news_for) + " " + geoData.getCityName()
-                else
-                    toolbar.title = getString(R.string.local_news)
-                return@OnNavigationItemSelectedListener  true
-            }
-            R.id.navigation_global -> {
-                toolbar.title = getString(R.string.global_news)
-                val globalIntent = Intent(baseContext, ListNews::class.java)
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                    globalIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>, grantResults: IntArray
+    ) {
+        when (requestCode) {
+            1 -> {
+                // If request is cancelled, the result arrays are empty.
+                if ((grantResults.isNotEmpty() &&
+                            grantResults[0] == PackageManager.PERMISSION_GRANTED)
+                ) {
+                    recreate()
+                } else {
+                    Toast.makeText(
+                        this,
+                        getString(R.string.permission),
+                        Toast.LENGTH_LONG
+                    ).show()
                 }
-                startActivity(globalIntent)
-                return@OnNavigationItemSelectedListener true
+                return
             }
+
+            // Add other 'when' lines to check for other
+            // permissions this app might request.
             else -> {
-                false
+                // Ignore all other requests.
             }
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+        if (geoData.getCityName() != null)
+            toolbar.title = getString(R.string.local_news_for) + " " + geoData.getCityName()
+        else
+            toolbar.title = getString(R.string.local_news_for)
+
+        toolbar.isHideOnContentScrollEnabled = true
     }
 
     private fun loadWebSiteSource(isRefreshed: Boolean) {
@@ -153,22 +184,29 @@ class MainActivity : AppCompatActivity() {
             else
             {
                 geoData.getCityName()?.let {
-                    mService.getLocalNews("$it OR ${it}е", geoData.getLanguage()).enqueue(
+                    mService.getLocalNews("$it OR ${it}е OR ${it}а OR ${it.substring(0, (it.length-1))}ы", geoData.getLanguage()).enqueue(
                         object : retrofit2.Callback<News> {
-                            var i = 0
                             override fun onResponse(call: Call<News>, response: Response<News>) {
-                                Paper.book().write("cache", Gson().toJson(response.body()!!))
-                                response.body()!!.articles?.forEach { it ->
-                                    try {
-                                        it.urlToImage?.let { it1 -> Log.e("Counter", it1) }
-                                        URL(it.urlToImage).readBytes()
-                                    } catch (e: Exception) {
-                                        println(e)
-                                        i++
-                                        it.isImage = false
+                                var cnt = 0
+
+                                lifecycleScope.executeAsyncTask(onPreExecute = {
+                                    // ... runs in Main Thread
+                                }, doInBackground = {
+                                    for (i in 0 until response.body()!!.articles?.size!!) {
+                                        try {
+                                            URL(response.body()!!.articles?.get(i)?.urlToImage)
+                                            response.body()!!.articles?.get(i)?.isImage  = true
+                                        } catch (e: Exception) {
+                                            cnt++
+                                        }
                                     }
-                                }
-                                Log.e("Counter", i.toString())
+                                    // ... runs in Worker(Background) Thread
+                                    cnt.toString() // send data to "onPostExecute"
+                                }, onPostExecute = { it ->
+                                    println("We lost $it images")
+                                    // runs in Main Thread
+                                    // ... here "it" is the data returned from "doInBackground"
+                                })
 
                                 Picasso.get()
                                     .load(response.body()?.articles?.get(0)?.urlToImage)
@@ -187,6 +225,8 @@ class MainActivity : AppCompatActivity() {
                                 top_author.text = response.body()!!.articles!![0].author
                                 topUrl = response.body()!!.articles!![0].url.toString()
 
+                                Paper.book().write("cache", Gson().toJson(response.body()!!))
+
                                 // Load all articles that remains
                                 val firstItemRemoved = response.body()!!.articles
                                 firstItemRemoved!!.removeAt(0)
@@ -199,7 +239,7 @@ class MainActivity : AppCompatActivity() {
                             }
 
                             override fun onFailure(call: Call<News>, t: Throwable) {
-                                Toast.makeText(baseContext, "Failed to load", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(baseContext, getString(R.string.failedToLoad), Toast.LENGTH_SHORT).show()
 
                                 dialog.dismiss()
                             }
@@ -212,14 +252,32 @@ class MainActivity : AppCompatActivity() {
         {
             swipe_to_refresh.isRefreshing = true
 
-            NoImage.data?.clear()
-
             // Fetch new data
             geoData.getCityName()?.let {
-                mService.getLocalNews("$it OR ${it}е", geoData.getLanguage()).enqueue(
+                mService.getLocalNews("$it OR ${it}е OR ${it}а OR ${it.substring(0, (it.length-1))}ы", geoData.getLanguage()).enqueue(
                     object : retrofit2.Callback<News> {
                         override fun onResponse(call: Call<News>, response: Response<News>) {
-                            Paper.book().write("cache", Gson().toJson(response.body()!!))
+                            var cnt = 0
+
+                            lifecycleScope.executeAsyncTask(onPreExecute = {
+                                // ... runs in Main Thread
+                            }, doInBackground = {
+                                for (i in 0 until response.body()!!.articles?.size!!) {
+                                    try {
+                                        URL(response.body()!!.articles?.get(i)?.urlToImage)
+                                        response.body()!!.articles?.get(i)?.isImage  = true
+                                    } catch (e: Exception) {
+                                        response.body()!!.articles?.get(i)?.isImage  = false
+                                        cnt++
+                                    }
+                                }
+                                // ... runs in Worker(Background) Thread
+                                cnt.toString() // send data to "onPostExecute"
+                            }, onPostExecute = { it ->
+                                println("We lost $it images")
+                                // runs in Main Thread
+                                // ... here "it" is the data returned from "doInBackground"
+                            })
 
                             Picasso.get()
                                 .load(response.body()?.articles?.get(0)?.urlToImage)
@@ -235,6 +293,8 @@ class MainActivity : AppCompatActivity() {
                             top_author.text = response.body()!!.articles!![0].author
                             topUrl = response.body()!!.articles!![0].url.toString()
 
+                            Paper.book().write("cache", Gson().toJson(response.body()!!))
+
                             val firstItemRemoved = response.body()!!.articles
                             firstItemRemoved!!.removeAt(0)
 
@@ -246,7 +306,7 @@ class MainActivity : AppCompatActivity() {
                         }
 
                         override fun onFailure(call : Call<News>, t : Throwable) {
-                            Toast.makeText(baseContext, "Failed to load", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(baseContext, getString(R.string.failedToLoad), Toast.LENGTH_SHORT).show()
 
                             swipe_to_refresh.isRefreshing = false
                         }

@@ -12,15 +12,11 @@ import com.example.easynews.NewsDetails
 import com.example.easynews.R
 import com.example.easynews.`interface`.ItemClickListener
 import com.example.easynews.model.Article
-import com.example.easynews.network.GlobalVars
 import com.google.gson.internal.bind.util.ISO8601Utils
 import com.squareup.picasso.Picasso
-import io.paperdb.Paper
 import java.text.ParseException
 import java.text.ParsePosition
 import java.util.*
-import kotlin.collections.ArrayList
-
 
 class ListNewsAdapter(private val context : Context, private val articleList: MutableList<Article>) : RecyclerView.Adapter<ListNewsViewHolder>() {
     override fun onCreateViewHolder(parent : ViewGroup, viewType : Int) : ListNewsViewHolder {
@@ -36,33 +32,13 @@ class ListNewsAdapter(private val context : Context, private val articleList: Mu
 
     override fun onBindViewHolder(holder: ListNewsViewHolder, position: Int) {
         // Load image
-        Picasso.get().load(articleList[position].urlToImage).into(holder.articleImage)
+        Picasso.get().load(articleList[position].urlToImage).resize(600,  240).into(holder.articleImage)
 
         val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
         StrictMode.setThreadPolicy(policy)
 
-        if (GlobalVars.isNetworkConnected) {
-            /*try {
-                URL(articleList[position].urlToImage).readBytes()
-                NoImage.isData = true
-                NoImage.data?.add(position,"Data")
-            } catch (e : IOException) {
-                Picasso.get().load(R.drawable.no_image_available).into(holder.articleImage)
-                NoImage.isData = false
-                NoImage.data?.add(position,"No Data")
-            }
-            if (NoImage.data != null)
-                Paper.book().write("imageData", NoImage.data)*/
-            if (!articleList[position].isImage) {
-                Picasso.get().load(R.drawable.no_image_available).into(holder.articleImage)
-            }
-        }
-        else {
-            val cache = Paper.book().read<ArrayList<String>>("imageData")
-            if (cache != null && cache.isNotEmpty() && (cache.size > position)) {
-                if (cache[position] == "No Data")
-                    Picasso.get().load(R.drawable.no_image_available).into(holder.articleImage)
-            }
+        if (!articleList[position].isImage) {
+            Picasso.get().load(R.drawable.no_image_available).into(holder.articleImage)
         }
 
         if (articleList[position].title!!.length > 65) {

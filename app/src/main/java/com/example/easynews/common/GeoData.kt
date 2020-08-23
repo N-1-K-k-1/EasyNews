@@ -4,6 +4,7 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.AlertDialog
+import android.app.Instrumentation
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -13,12 +14,16 @@ import android.location.LocationManager
 import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.app.ActivityCompat.requestPermissions
 import androidx.core.content.ContextCompat
 import com.example.easynews.R
 import com.google.android.gms.location.*
 import java.util.*
+
+
 private lateinit var fusedLocationClient: FusedLocationProviderClient
 private lateinit var locationRequest: LocationRequest
 private lateinit var locationCallback: LocationCallback
@@ -30,39 +35,13 @@ class GeoData(private val context: Context, private val savedInstanceState: Bund
     private lateinit var geocode: Geocoder
     private var location: Location? = null
 
-    fun getCityName(): String? {
-
-        geocode = Geocoder(context, Locale.getDefault())
-
-        val addresses = location?.latitude?.let { location?.longitude?.let { it1 ->
-            geocode.getFromLocation(it,
-                it1, 1)
-        } }
-
-        return addresses?.get(0)?.locality
-    }
-
-    fun getLanguage(): String {
-        geocode = Geocoder(context, Locale.getDefault())
-        val addresses = location?.latitude?.let { location?.longitude?.let { it1 ->
-            geocode.getFromLocation(it,
-                it1, 1)
-        } }
-
-        return if (addresses?.get(0)?.countryName == "Russia" || addresses?.get(0)?.countryName == "Россия" ||
-            addresses?.get(0)?.countryName == "Russian Federation" || addresses?.get(0)?.countryName == "Российская Федерация" )
-            "ru"
-        else
-            "en"
-    }
-
     fun checkLocation(){
         if (ActivityCompat.checkSelfPermission(
-                context,
-                Manifest.permission.ACCESS_FINE_LOCATION
+                        context,
+                        Manifest.permission.ACCESS_FINE_LOCATION
             ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                context,
-                Manifest.permission.ACCESS_COARSE_LOCATION
+                        context,
+                        Manifest.permission.ACCESS_COARSE_LOCATION
             ) != PackageManager.PERMISSION_GRANTED
         ) {
             requestPermissions (
@@ -78,7 +57,8 @@ class GeoData(private val context: Context, private val savedInstanceState: Bund
             if (getLastKnownLocation() == null) {
                 getLocationUpdates()
                 startLocationUpdates()
-                showAlertMessage()
+                Thread.sleep(100)
+                stopLocationUpdates()
             }
             else {
                 getLocationUpdates()
@@ -86,6 +66,32 @@ class GeoData(private val context: Context, private val savedInstanceState: Bund
                 stopLocationUpdates()
             }
         }
+    }
+
+    fun getCityName(): String? {
+
+        geocode = Geocoder(context, Locale.getDefault())
+
+        val addresses = location?.latitude?.let { location?.longitude?.let { it1 ->
+            geocode.getFromLocation(it,
+                    it1, 1)
+        } }
+
+        return addresses?.get(0)?.locality
+    }
+
+    fun getLanguage(): String {
+        geocode = Geocoder(context, Locale.getDefault())
+        val addresses = location?.latitude?.let { location?.longitude?.let { it1 ->
+            geocode.getFromLocation(it,
+                    it1, 1)
+        } }
+
+        return if (addresses?.get(0)?.countryName == "Russia" || addresses?.get(0)?.countryName == "Россия" ||
+                addresses?.get(0)?.countryName == "Russian Federation" || addresses?.get(0)?.countryName == "Российская Федерация" )
+            "ru"
+        else
+            "en"
     }
 
     @SuppressLint("MissingPermission")
@@ -119,7 +125,7 @@ class GeoData(private val context: Context, private val savedInstanceState: Bund
             ContextCompat.startActivity(context, myIntent, savedInstanceState)
         }
         dialog.setNegativeButton(context.getString(R.string.cancel)) { _, _ ->
-            (context as Activity).finish()
+            (context as Activity).finishAndRemoveTask()
         }
         dialog.setCancelable(false)
         dialog.show()
@@ -152,7 +158,7 @@ class GeoData(private val context: Context, private val savedInstanceState: Bund
     }
 
     // Stop location updates
-    fun stopLocationUpdates() {
+    private fun stopLocationUpdates() {
         fusedLocationClient.removeLocationUpdates(locationCallback)
     }
 }
