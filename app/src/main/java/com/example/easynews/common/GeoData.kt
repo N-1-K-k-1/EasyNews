@@ -3,23 +3,15 @@ package com.example.easynews.common
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.app.AlertDialog
-import android.app.Instrumentation
 import android.content.Context
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Geocoder
 import android.location.Location
 import android.location.LocationManager
-import android.os.Bundle
-import android.provider.Settings
+import android.telephony.TelephonyManager
 import android.util.Log
-import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.app.ActivityCompat.requestPermissions
-import androidx.core.content.ContextCompat
-import com.example.easynews.R
 import com.google.android.gms.location.*
 import java.util.*
 
@@ -30,20 +22,13 @@ private lateinit var locationCallback: LocationCallback
 
 
 
-class GeoData(private val context: Context, private val savedInstanceState: Bundle?)  {
+class GeoData(private val context: Context)  {
 
     private lateinit var geocode: Geocoder
     private var location: Location? = null
 
     fun checkLocation(){
-        if (ActivityCompat.checkSelfPermission(
-                        context,
-                        Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                        context,
-                        Manifest.permission.ACCESS_COARSE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
+        if (!checkPermissions()) {
             requestPermissions (
                 context as Activity,
                 arrayOf(
@@ -59,11 +44,7 @@ class GeoData(private val context: Context, private val savedInstanceState: Bund
                 startLocationUpdates()
                 Thread.sleep(100)
                 stopLocationUpdates()
-            }
-            else {
-                getLocationUpdates()
-                startLocationUpdates()
-                stopLocationUpdates()
+                Log.e("Last location", "Null")
             }
         }
     }
@@ -81,17 +62,60 @@ class GeoData(private val context: Context, private val savedInstanceState: Bund
     }
 
     fun getLanguage(): String {
-        geocode = Geocoder(context, Locale.getDefault())
+        geocode = Geocoder(context, Locale.ENGLISH)
         val addresses = location?.latitude?.let { location?.longitude?.let { it1 ->
             geocode.getFromLocation(it,
                     it1, 1)
         } }
 
-        return if (addresses?.get(0)?.countryName == "Russia" || addresses?.get(0)?.countryName == "Россия" ||
-                addresses?.get(0)?.countryName == "Russian Federation" || addresses?.get(0)?.countryName == "Российская Федерация" )
+        return if (addresses?.get(0)?.countryName == "Russia" || addresses?.get(0)?.countryName == "Russian Federation")
             "ru"
         else
             "en"
+    }
+
+    fun getCountry(): String {
+        if (checkPermissions()) {
+            geocode = Geocoder(context, Locale.ENGLISH)
+            val addresses = location?.latitude?.let { location?.longitude?.let { it1 ->
+                geocode.getFromLocation(it,
+                    it1, 1)
+            } }
+                when(addresses?.get(0)?.countryName) {
+                    "Russia" -> { return "ru" }
+                    "Russian Federation" -> { return "ru" }
+                    "United Arab Emirates" -> { return "ae" }
+                    "UAE" -> { return "ae" }
+                    "Argentina" -> { return "ar" }
+                    "Austria" -> { return "at" }
+                    "Australia" -> { return "au" }
+                    "Belgium" -> { return "be" }
+                    "Bulgaria" -> { return "bg" }
+                    "Brazil" -> { return "br" }
+                    "Canada" -> { return "ca" }
+                    "Switzerland" -> { return "ch" }
+                    "China" -> { return "cn" }
+                    "Colombia" -> { return "co" }
+                    "Cuba" -> { return "cu" }
+                    "Czech Republic" -> { return "cz" }
+                    "Germany" -> { return "de" }
+                    "Egypt" -> { return "eg" }
+                    "France" -> { return "fr" }
+                    "United Kingdom" -> { return "gb" }
+                    "Greece" -> { return "gr" }
+                    "Hong Kong" -> { return "hk" }
+                    "Hungary" -> { return "hu" }
+                    "Indonesia" -> { return "id" }
+                    else -> { return "gb" }
+                }
+        }
+        else {
+            val tm = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
+
+            println(tm.networkCountryIso)
+
+            return tm.networkCountryIso
+        }
     }
 
     @SuppressLint("MissingPermission")
@@ -117,18 +141,14 @@ class GeoData(private val context: Context, private val savedInstanceState: Bund
         return location
     }
 
-    private fun showAlertMessage() {
-        val dialog = AlertDialog.Builder(context)
-        dialog.setMessage(context.getString(R.string.alert))
-        dialog.setPositiveButton(context.getString(R.string.settings)) { _, _ ->
-            val myIntent = Intent(Settings.ACTION_APPLICATION_SETTINGS)
-            ContextCompat.startActivity(context, myIntent, savedInstanceState)
-        }
-        dialog.setNegativeButton(context.getString(R.string.cancel)) { _, _ ->
-            (context as Activity).finishAndRemoveTask()
-        }
-        dialog.setCancelable(false)
-        dialog.show()
+    fun checkPermissions(): Boolean {
+        return ActivityCompat.checkSelfPermission(
+            context,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+            context,
+            Manifest.permission.ACCESS_COARSE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
     }
 
     private fun getLocationUpdates() {

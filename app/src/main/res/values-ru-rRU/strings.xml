@@ -13,4 +13,6 @@
     <string name="title">Заголовок</string>
     <string name="author">Автор</string>
     <string name="permission">Для отображения локальных новостей требуется разрешение</string>
+    <string name="global_news_actionBar">Мировые новости</string>
+    <string name="action_title">Новость</string>
 </resources>

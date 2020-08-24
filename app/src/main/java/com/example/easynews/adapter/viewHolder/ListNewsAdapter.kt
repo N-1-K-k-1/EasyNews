@@ -3,7 +3,6 @@ package com.example.easynews.adapter.viewHolder
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import android.os.StrictMode
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,10 +12,12 @@ import com.example.easynews.R
 import com.example.easynews.`interface`.ItemClickListener
 import com.example.easynews.model.Article
 import com.google.gson.internal.bind.util.ISO8601Utils
+import com.squareup.picasso.Callback
 import com.squareup.picasso.Picasso
 import java.text.ParseException
 import java.text.ParsePosition
 import java.util.*
+
 
 class ListNewsAdapter(private val context : Context, private val articleList: MutableList<Article>) : RecyclerView.Adapter<ListNewsViewHolder>() {
     override fun onCreateViewHolder(parent : ViewGroup, viewType : Int) : ListNewsViewHolder {
@@ -31,11 +32,21 @@ class ListNewsAdapter(private val context : Context, private val articleList: Mu
     }
 
     override fun onBindViewHolder(holder: ListNewsViewHolder, position: Int) {
-        // Load image
-        Picasso.get().load(articleList[position].urlToImage).resize(600,  240).into(holder.articleImage)
 
-        val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
-        StrictMode.setThreadPolicy(policy)
+        val mImageCallback: Callback = object : Callback {
+            override fun onSuccess() {
+            }
+
+            override fun onError(e: Exception?) {
+                articleList[position].isImage = false
+            }
+        }
+
+        // Load image
+        Picasso.get()
+            .load(articleList[position].urlToImage)
+            .error(R.drawable.no_image_available)
+            .into(holder.articleImage, mImageCallback)
 
         if (!articleList[position].isImage) {
             Picasso.get().load(R.drawable.no_image_available).into(holder.articleImage)
@@ -69,7 +80,6 @@ class ListNewsAdapter(private val context : Context, private val articleList: Mu
                 }
                 context.startActivity(detail)
             }
-
         })
     }
 

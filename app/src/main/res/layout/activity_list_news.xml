@@ -6,8 +6,8 @@
     android:id="@+id/swipe_to_refresh"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ListNews">
-
+    android:fitsSystemWindows="true"
+    tools:context=".MainActivity">
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -38,10 +38,8 @@
                     android:layout_marginStart="30dp"
                     android:layout_marginBottom="30dp"
                     android:fontFamily="sans-serif-condensed"
-                    android:text="Author"
                     android:textColor="@android:color/white"
-                    android:textSize="25sp"
-                    tools:ignore="HardcodedText" />
+                    android:textSize="25sp" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -59,11 +57,9 @@
                         android:layout_marginStart="30dp"
                         android:layout_marginBottom="30dp"
                         android:fontFamily="sans-serif-condensed"
-                        android:text="Title"
                         android:textColor="@android:color/white"
                         android:textSize="18sp"
-                        android:textStyle="bold"
-                        tools:ignore="HardcodedText" />
+                        android:textStyle="bold" />
 
                 </LinearLayout>
             </RelativeLayout>
@@ -95,4 +91,5 @@
             app:menu="@menu/navigation" />
 
     </RelativeLayout>
+
 </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

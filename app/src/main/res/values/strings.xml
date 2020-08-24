@@ -3,6 +3,7 @@
     <string name="bookmarks" >Bookmarks</string>
     <string name="search">Search</string>
     <string name="global_news">World news</string>
+    <string name="global_news_actionBar">World News</string>
     <string name="local_news">Local news</string>
     <string name="local_news_for">Local news for</string>
     <string name="settings">Settings</string>
@@ -12,4 +13,5 @@
     <string name="title">Title</string>
     <string name="author">Author</string>
     <string name="permission">Permission is required to display local news</string>
+    <string name="action_title">News</string>
 </resources>

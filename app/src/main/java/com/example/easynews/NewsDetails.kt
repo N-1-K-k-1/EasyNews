@@ -2,17 +2,19 @@ package com.example.easynews
 
 import android.annotation.SuppressLint
 import android.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.appcompat.app.ActionBar
+import androidx.appcompat.app.AppCompatActivity
 import dmax.dialog.SpotsDialog
 import kotlinx.android.synthetic.main.activity_news_details.*
 
 class NewsDetails : AppCompatActivity() {
 
-    lateinit var dialog : AlertDialog
+    private lateinit var dialog : AlertDialog
+    private lateinit var toolbar: ActionBar
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -21,6 +23,9 @@ class NewsDetails : AppCompatActivity() {
 
         dialog = SpotsDialog.Builder().setContext(this).build()
         dialog.show()
+
+        toolbar = supportActionBar!!
+        toolbar.hide()
 
         //WebView
         webView.settings.javaScriptEnabled = true
@@ -31,8 +36,9 @@ class NewsDetails : AppCompatActivity() {
             }
         }
 
-        if (intent != null)
-            if(intent.getStringExtra("webUrl")!!.isNotEmpty())
+        if (intent.getStringExtra("webUrl") != null) {
+            if (intent.getStringExtra("webUrl")!!.isNotEmpty())
                 webView.loadUrl(intent.getStringExtra("webUrl")!!)
+        }
     }
 }

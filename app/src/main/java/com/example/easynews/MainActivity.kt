@@ -6,6 +6,8 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.os.StrictMode
+import android.view.Menu
+import android.view.MenuItem
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
@@ -30,30 +32,31 @@ import retrofit2.Response
 import java.io.IOException
 import java.net.URL
 
+
 class MainActivity : AppCompatActivity() {
 
-    var topUrl: String = ""
+    private var topUrl: String? = ""
 
     private lateinit var layoutManager: LinearLayoutManager
     private lateinit var mService: NewsService
-    lateinit var adapter: ListNewsAdapter
-    lateinit var dialog: AlertDialog
+    private lateinit var adapter: ListNewsAdapter
+    private lateinit var dialog: AlertDialog
     private lateinit var bottomNav: BottomNavigationView
+    private lateinit var menu: Menu
+    private lateinit var menuItem: MenuItem
     private lateinit var toolbar: androidx.appcompat.app.ActionBar
     private lateinit var geoData: GeoData
 
     private val navListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
         when (item.itemId) {
             R.id.navigation_local -> {
-                if (geoData.getCityName() != null)
-                    toolbar.title = getString(R.string.local_news_for) + " " + geoData.getCityName()
-                else
-                    toolbar.title = getString(R.string.local_news_for)
+                loadWebSiteSource(true)
+                toolbar.title = getString(R.string.local_news_for)
 
                 return@OnNavigationItemSelectedListener  true
             }
             R.id.navigation_global -> {
-                toolbar.title = getString(R.string.global_news)
+                toolbar.title = getString(R.string.global_news_actionBar)
                 val globalIntent = Intent(baseContext, ListNews::class.java)
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                     globalIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -87,26 +90,14 @@ class MainActivity : AppCompatActivity() {
         /* Bottom navigation */
         bottomNav = findViewById(R.id.navigationView)
         bottomNav.setOnNavigationItemSelectedListener(navListener)
+        menu = bottomNav.menu
 
         /* Top action bar */
         toolbar = supportActionBar!!
 
         /* Detect location and check permissions */
-        geoData = GeoData(this, savedInstanceState)
+        geoData = GeoData(this)
         geoData.checkLocation()
-
-
-        /* View */
-        swipe_to_refresh.setOnRefreshListener { loadWebSiteSource(true) }
-
-        diagonalLayout.setOnClickListener {
-            val detail = Intent(baseContext, NewsDetails::class.java)
-            detail.putExtra("webUrl", topUrl)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                detail.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            }
-            startActivity(detail)
-        }
 
         list_news.setHasFixedSize(true)
         layoutManager = LinearLayoutManager(this)
@@ -117,9 +108,42 @@ class MainActivity : AppCompatActivity() {
         loadWebSiteSource(false)
     }
 
+    override fun onStart() {
+        super.onStart()
+
+        /* Changing menu item */
+        menuItem = menu.getItem(0)
+        menuItem.isChecked = true
+
+        /* View */
+        swipe_to_refresh.setOnRefreshListener {
+            if (geoData.checkPermissions())
+                loadWebSiteSource(true)
+            else
+                Toast.makeText(this, getString(R.string.permission), Toast.LENGTH_LONG).show()
+        }
+
+        diagonalLayout.setOnClickListener {
+            val detail = Intent(baseContext, NewsDetails::class.java)
+            detail.putExtra("webUrl", topUrl)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                detail.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            startActivity(detail)
+        }
+
+        if (geoData.getCityName() != null)
+            toolbar.title = getString(R.string.local_news_for) + " " + geoData.getCityName()
+        else
+            toolbar.title = getString(R.string.local_news_for)
+
+        toolbar.isHideOnContentScrollEnabled = true
+    }
+
     override fun onRequestPermissionsResult(
         requestCode: Int,
-        permissions: Array<String>, grantResults: IntArray
+        permissions: Array<String>,
+        grantResults: IntArray
     ) {
         when (requestCode) {
             1 -> {
@@ -146,17 +170,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onStart() {
-        super.onStart()
-
-        if (geoData.getCityName() != null)
-            toolbar.title = getString(R.string.local_news_for) + " " + geoData.getCityName()
-        else
-            toolbar.title = getString(R.string.local_news_for)
-
-        toolbar.isHideOnContentScrollEnabled = true
-    }
-
     private fun loadWebSiteSource(isRefreshed: Boolean) {
 
         // If not refreshed, then read cache, else load website and write cache
@@ -164,7 +177,7 @@ class MainActivity : AppCompatActivity() {
 
             GlobalVars.counter++
 
-            val cache = Paper.book().read<String>("cache")
+            val cache = Paper.book().read<String>("cacheLocal")
 
             if (cache != null && !cache.isBlank() && cache != "null" && !GlobalVars.isNetworkConnected)
             {
@@ -173,6 +186,8 @@ class MainActivity : AppCompatActivity() {
                 Picasso.get().load(news.articles?.get(0)?.urlToImage).into(top_image)
                 top_title.text = news.articles?.get(0)?.title
                 top_author.text = news.articles?.get(0)?.author
+
+                topUrl = news.articles?.get(0)?.url
 
                 val firstItemRemoved = news.articles
                 firstItemRemoved?.removeAt(0)
@@ -192,7 +207,13 @@ class MainActivity : AppCompatActivity() {
                                 lifecycleScope.executeAsyncTask(onPreExecute = {
                                     // ... runs in Main Thread
                                 }, doInBackground = {
+                                    val regex = Regex(pattern = """\d+""")
                                     for (i in 0 until response.body()!!.articles?.size!!) {
+                                        if (response.body()!!.articles?.get(i)?.title?.let { it1 ->
+                                                regex.matches(it1)
+                                            }!!) {
+                                            response.body()!!.articles?.get(i)?.title = response.body()!!.articles?.get(i)?.description
+                                        }
                                         try {
                                             URL(response.body()!!.articles?.get(i)?.urlToImage)
                                             response.body()!!.articles?.get(i)?.isImage  = true
@@ -223,9 +244,10 @@ class MainActivity : AppCompatActivity() {
 
                                 top_title.text = response.body()!!.articles!![0].title
                                 top_author.text = response.body()!!.articles!![0].author
-                                topUrl = response.body()!!.articles!![0].url.toString()
 
-                                Paper.book().write("cache", Gson().toJson(response.body()!!))
+                                topUrl = response.body()!!.articles!![0].url
+
+                                Paper.book().write("cacheLocal", Gson().toJson(response.body()!!))
 
                                 // Load all articles that remains
                                 val firstItemRemoved = response.body()!!.articles
@@ -262,7 +284,13 @@ class MainActivity : AppCompatActivity() {
                             lifecycleScope.executeAsyncTask(onPreExecute = {
                                 // ... runs in Main Thread
                             }, doInBackground = {
+                                val regex = Regex(pattern = """\d+""")
                                 for (i in 0 until response.body()!!.articles?.size!!) {
+                                    if (response.body()!!.articles?.get(i)?.title?.let { it1 ->
+                                            regex.matches(it1)
+                                        }!!) {
+                                        response.body()!!.articles?.get(i)?.title = response.body()!!.articles?.get(i)?.description
+                                    }
                                     try {
                                         URL(response.body()!!.articles?.get(i)?.urlToImage)
                                         response.body()!!.articles?.get(i)?.isImage  = true
@@ -291,9 +319,10 @@ class MainActivity : AppCompatActivity() {
 
                             top_title.text = response.body()!!.articles!![0].title
                             top_author.text = response.body()!!.articles!![0].author
-                            topUrl = response.body()!!.articles!![0].url.toString()
 
-                            Paper.book().write("cache", Gson().toJson(response.body()!!))
+                            topUrl = response.body()!!.articles!![0].url
+
+                            Paper.book().write("cacheLocal", Gson().toJson(response.body()!!))
 
                             val firstItemRemoved = response.body()!!.articles
                             firstItemRemoved!!.removeAt(0)
