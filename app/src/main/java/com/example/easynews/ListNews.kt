@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.os.StrictMode
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
@@ -47,18 +48,14 @@ class ListNews : AppCompatActivity() {
     private val navListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
         when (item.itemId) {
             R.id.navigation_local -> {
-                toolbar.title = getString(R.string.local_news_for)
                 val globalIntent = Intent(baseContext, MainActivity::class.java)
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                    globalIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                }
+                globalIntent.flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
                 startActivity(globalIntent)
 
                 return@OnNavigationItemSelectedListener  true
             }
             R.id.navigation_global -> {
                 loadGlobalNews(true)
-                toolbar.title = getString(R.string.global_news_actionBar)
 
                 return@OnNavigationItemSelectedListener true
             }
@@ -71,6 +68,8 @@ class ListNews : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         supportRequestWindowFeature(AppCompatDelegate.FEATURE_SUPPORT_ACTION_BAR_OVERLAY)
         super.onCreate(savedInstanceState)
+
+        Log.e("OnCreate()", "Initialized")
 
         /* Service */
         mService = Common.newsService
@@ -89,6 +88,20 @@ class ListNews : AppCompatActivity() {
         geoData = GeoData(this)
         geoData.checkLocation()
 
+        /* View */
+        swipe_to_refresh.setOnRefreshListener {
+            loadGlobalNews(true)
+        }
+
+        diagonalLayout.setOnClickListener {
+            val detail = Intent(baseContext, NewsDetails::class.java)
+            detail.putExtra("webUrl", topUrl)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                detail.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            startActivity(detail)
+        }
+
         list_news.setHasFixedSize(true)
         layoutManager = LinearLayoutManager(this)
         list_news.layoutManager = layoutManager
@@ -104,20 +117,6 @@ class ListNews : AppCompatActivity() {
         /* Changing menu item */
         menuItem = menu.getItem(1)
         menuItem.isChecked = true
-
-        /* View */
-        swipe_to_refresh.setOnRefreshListener {
-            loadGlobalNews(true)
-        }
-
-        diagonalLayout.setOnClickListener {
-            val detail = Intent(baseContext, NewsDetails::class.java)
-            detail.putExtra("webUrl", topUrl)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                detail.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            }
-            startActivity(detail)
-        }
 
         toolbar.title = getString(R.string.global_news_actionBar)
         toolbar.isHideOnContentScrollEnabled = true

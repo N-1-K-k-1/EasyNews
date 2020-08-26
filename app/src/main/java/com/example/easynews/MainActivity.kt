@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.os.StrictMode
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
@@ -50,18 +51,15 @@ class MainActivity : AppCompatActivity() {
     private val navListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
         when (item.itemId) {
             R.id.navigation_local -> {
-                loadWebSiteSource(true)
-                toolbar.title = getString(R.string.local_news_for)
+                loadLocalNews(true)
 
                 return@OnNavigationItemSelectedListener  true
             }
             R.id.navigation_global -> {
-                toolbar.title = getString(R.string.global_news_actionBar)
                 val globalIntent = Intent(baseContext, ListNews::class.java)
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                    globalIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                }
+                globalIntent.flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
                 startActivity(globalIntent)
+
                 return@OnNavigationItemSelectedListener true
             }
             else -> {
@@ -73,6 +71,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         supportRequestWindowFeature(AppCompatDelegate.FEATURE_SUPPORT_ACTION_BAR_OVERLAY)
         super.onCreate(savedInstanceState)
+
+        Log.e("OnCreate()", "Initialized")
 
         /* Check connection */
         val network = CheckNetwork(this)
@@ -99,26 +99,10 @@ class MainActivity : AppCompatActivity() {
         geoData = GeoData(this)
         geoData.checkLocation()
 
-        list_news.setHasFixedSize(true)
-        layoutManager = LinearLayoutManager(this)
-        list_news.layoutManager = layoutManager
-
-        dialog = SpotsDialog.Builder().setContext(this).build()
-
-        loadWebSiteSource(false)
-    }
-
-    override fun onStart() {
-        super.onStart()
-
-        /* Changing menu item */
-        menuItem = menu.getItem(0)
-        menuItem.isChecked = true
-
         /* View */
         swipe_to_refresh.setOnRefreshListener {
             if (geoData.checkPermissions())
-                loadWebSiteSource(true)
+                loadLocalNews(true)
             else
                 Toast.makeText(this, getString(R.string.permission), Toast.LENGTH_LONG).show()
         }
@@ -131,6 +115,22 @@ class MainActivity : AppCompatActivity() {
             }
             startActivity(detail)
         }
+
+        list_news.setHasFixedSize(true)
+        layoutManager = LinearLayoutManager(this)
+        list_news.layoutManager = layoutManager
+
+        dialog = SpotsDialog.Builder().setContext(this).build()
+
+        loadLocalNews(false)
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+        /* Changing menu item */
+        menuItem = menu.getItem(0)
+        menuItem.isChecked = true
 
         if (geoData.getCityName() != null)
             toolbar.title = getString(R.string.local_news_for) + " " + geoData.getCityName()
@@ -170,7 +170,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun loadWebSiteSource(isRefreshed: Boolean) {
+    private fun loadLocalNews(isRefreshed: Boolean) {
 
         // If not refreshed, then read cache, else load website and write cache
         if (!isRefreshed) {
