@@ -27,7 +27,14 @@ import com.google.gson.Gson
 import com.squareup.picasso.Picasso
 import dmax.dialog.SpotsDialog
 import io.paperdb.Paper
+import kotlinx.android.synthetic.main.activity_list_news.*
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.activity_main.diagonalLayout
+import kotlinx.android.synthetic.main.activity_main.list_news
+import kotlinx.android.synthetic.main.activity_main.swipe_to_refresh
+import kotlinx.android.synthetic.main.activity_main.top_author
+import kotlinx.android.synthetic.main.activity_main.top_image
+import kotlinx.android.synthetic.main.activity_main.top_title
 import retrofit2.Call
 import retrofit2.Response
 import java.io.IOException
@@ -62,6 +69,13 @@ class MainActivity : AppCompatActivity() {
 
                 return@OnNavigationItemSelectedListener true
             }
+            R.id.navigation_search -> {
+                val globalIntent = Intent(baseContext, SearchNews::class.java)
+                globalIntent.flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
+                startActivity(globalIntent)
+
+                return@OnNavigationItemSelectedListener true
+            }
             else -> {
                 false
             }
@@ -72,7 +86,7 @@ class MainActivity : AppCompatActivity() {
         supportRequestWindowFeature(AppCompatDelegate.FEATURE_SUPPORT_ACTION_BAR_OVERLAY)
         super.onCreate(savedInstanceState)
 
-        Log.e("OnCreate()", "Initialized")
+        setContentView(R.layout.activity_main)
 
         /* Check connection */
         val network = CheckNetwork(this)
@@ -84,8 +98,6 @@ class MainActivity : AppCompatActivity() {
 
         /* Service */
         mService = Common.newsService
-
-        setContentView(R.layout.activity_main)
 
         /* Bottom navigation */
         bottomNav = findViewById(R.id.navigationView)
@@ -132,6 +144,7 @@ class MainActivity : AppCompatActivity() {
         menuItem = menu.getItem(0)
         menuItem.isChecked = true
 
+        /* Changing title in ActionBar */
         if (geoData.getCityName() != null)
             toolbar.title = getString(R.string.local_news_for) + " " + geoData.getCityName()
         else
@@ -203,11 +216,11 @@ class MainActivity : AppCompatActivity() {
                         object : retrofit2.Callback<News> {
                             override fun onResponse(call: Call<News>, response: Response<News>) {
                                 var cnt = 0
+                                val regex = Regex(pattern = """\d+""")
 
                                 lifecycleScope.executeAsyncTask(onPreExecute = {
                                     // ... runs in Main Thread
                                 }, doInBackground = {
-                                    val regex = Regex(pattern = """\d+""")
                                     for (i in 0 until response.body()!!.articles?.size!!) {
                                         if (response.body()!!.articles?.get(i)?.title?.let { it1 ->
                                                 regex.matches(it1)
@@ -243,7 +256,15 @@ class MainActivity : AppCompatActivity() {
                                 }
 
                                 top_title.text = response.body()!!.articles!![0].title
-                                top_author.text = response.body()!!.articles!![0].author
+
+                                if (response.body()!!.articles?.get(0)?.author != null) {
+                                    if (response.body()!!.articles!![0].author?.let { it1 ->
+                                            regex.matches(it1)
+                                        }!!)
+                                        top_author.text = ""
+                                    else
+                                        top_author.text = response.body()!!.articles!![0].author
+                                }
 
                                 topUrl = response.body()!!.articles!![0].url
 
@@ -280,11 +301,11 @@ class MainActivity : AppCompatActivity() {
                     object : retrofit2.Callback<News> {
                         override fun onResponse(call: Call<News>, response: Response<News>) {
                             var cnt = 0
+                            val regex = Regex(pattern = """\d+""")
 
                             lifecycleScope.executeAsyncTask(onPreExecute = {
                                 // ... runs in Main Thread
                             }, doInBackground = {
-                                val regex = Regex(pattern = """\d+""")
                                 for (i in 0 until response.body()!!.articles?.size!!) {
                                     if (response.body()!!.articles?.get(i)?.title?.let { it1 ->
                                             regex.matches(it1)
@@ -318,7 +339,15 @@ class MainActivity : AppCompatActivity() {
                             }
 
                             top_title.text = response.body()!!.articles!![0].title
-                            top_author.text = response.body()!!.articles!![0].author
+
+                            if (response.body()!!.articles?.get(0)?.author != null) {
+                                if (response.body()!!.articles!![0].author?.let { it1 ->
+                                        regex.matches(it1)
+                                    }!!)
+                                    top_author.text = ""
+                                else
+                                    top_author.text = response.body()!!.articles!![0].author
+                            }
 
                             topUrl = response.body()!!.articles!![0].url
 

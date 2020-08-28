@@ -8,13 +8,16 @@ import retrofit2.http.*
 interface NewsService {
 
     @Headers("X-Api-Key: 848c158751374e079db06e2de9191ad5")
-    @GET("v2/everything?sortBy=publishedAt&pageSize=100&excludeDomains=pikabu.ru, yandex.ru, story_from_life.d3.ru")
-    fun getLocalNews(@Query("q") cityName: String, @Query("language") lang: String) : Call<News>
+    @GET("v2/everything?sortBy=publishedAt&pageSize=100&" +
+            "excludeDomains=pikabu.ru, yandex.ru, story_from_life.d3.ru, linux.org.ru")
+    fun getLocalNews(@Query("q") cityName: String, @Query("language") lang: String): Call<News>
 
     @Headers("X-Api-Key: 848c158751374e079db06e2de9191ad5")
     @GET("v2/top-headlines?pageSize=100")
-    fun getGlobalNews(@Query("country") country: String) : Call<News>
+    fun getGlobalNews(@Query("country") country: String): Call<News>
 
-    @GET
-    fun getNewsFromSource (@Url url: String): Call<News>
+    @Headers("X-Api-Key: 848c158751374e079db06e2de9191ad5")
+    @GET("v2/everything?sortBy=publishedAt&pageSize=100")
+    fun getNewsFromSearch(@Query("q") searchValue: String): Call<News>
+
 }
