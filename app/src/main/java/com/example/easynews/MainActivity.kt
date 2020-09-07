@@ -6,7 +6,6 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.os.StrictMode
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
@@ -27,14 +26,7 @@ import com.google.gson.Gson
 import com.squareup.picasso.Picasso
 import dmax.dialog.SpotsDialog
 import io.paperdb.Paper
-import kotlinx.android.synthetic.main.activity_list_news.*
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.activity_main.diagonalLayout
-import kotlinx.android.synthetic.main.activity_main.list_news
-import kotlinx.android.synthetic.main.activity_main.swipe_to_refresh
-import kotlinx.android.synthetic.main.activity_main.top_author
-import kotlinx.android.synthetic.main.activity_main.top_image
-import kotlinx.android.synthetic.main.activity_main.top_title
 import retrofit2.Call
 import retrofit2.Response
 import java.io.IOException
@@ -71,6 +63,13 @@ class MainActivity : AppCompatActivity() {
             }
             R.id.navigation_search -> {
                 val globalIntent = Intent(baseContext, SearchNews::class.java)
+                globalIntent.flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
+                startActivity(globalIntent)
+
+                return@OnNavigationItemSelectedListener true
+            }
+            R.id.navigation_bookmarks -> {
+                val globalIntent = Intent(baseContext, Bookmarks::class.java)
                 globalIntent.flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
                 startActivity(globalIntent)
 
@@ -282,7 +281,7 @@ class MainActivity : AppCompatActivity() {
                             }
 
                             override fun onFailure(call: Call<News>, t: Throwable) {
-                                Toast.makeText(baseContext, getString(R.string.failedToLoad), Toast.LENGTH_SHORT).show()
+                                Toast.makeText(baseContext, getString(R.string.failedToLoadLocal), Toast.LENGTH_LONG).show()
 
                                 dialog.dismiss()
                             }
@@ -364,7 +363,7 @@ class MainActivity : AppCompatActivity() {
                         }
 
                         override fun onFailure(call : Call<News>, t : Throwable) {
-                            Toast.makeText(baseContext, getString(R.string.failedToLoad), Toast.LENGTH_SHORT).show()
+                            Toast.makeText(baseContext, getString(R.string.failedToLoadLocal), Toast.LENGTH_LONG).show()
 
                             swipe_to_refresh.isRefreshing = false
                         }

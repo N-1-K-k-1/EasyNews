@@ -73,6 +73,13 @@ class ListNews : AppCompatActivity() {
 
                 return@OnNavigationItemSelectedListener true
             }
+            R.id.navigation_bookmarks -> {
+                val globalIntent = Intent(baseContext, Bookmarks::class.java)
+                globalIntent.flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
+                startActivity(globalIntent)
+
+                return@OnNavigationItemSelectedListener true
+            }
             else -> {
                 false
             }

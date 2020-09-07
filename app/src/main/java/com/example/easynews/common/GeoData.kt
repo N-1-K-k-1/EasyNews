@@ -42,8 +42,8 @@ class GeoData(private val context: Context)  {
             if (getLastKnownLocation() == null) {
                 getLocationUpdates()
                 startLocationUpdates()
-                Thread.sleep(100)
-                stopLocationUpdates()
+                //Thread.sleep(100)
+                //stopLocationUpdates()
                 Log.e("Last location", "Null")
             }
         }

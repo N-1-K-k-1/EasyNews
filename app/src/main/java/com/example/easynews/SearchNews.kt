@@ -8,7 +8,6 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
-import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
@@ -22,9 +21,7 @@ import com.example.easynews.model.News
 import com.example.easynews.network.AsyncTask.executeAsyncTask
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import dmax.dialog.SpotsDialog
-import kotlinx.android.synthetic.main.activity_list_news.*
 import kotlinx.android.synthetic.main.activity_search_news.*
-import kotlinx.android.synthetic.main.activity_search_news.list_news
 import retrofit2.Call
 import retrofit2.Response
 import java.net.URL
@@ -63,6 +60,13 @@ class SearchNews : AppCompatActivity() {
 
                 return@OnNavigationItemSelectedListener true
             }
+            R.id.navigation_bookmarks -> {
+                val globalIntent = Intent(baseContext, Bookmarks::class.java)
+                globalIntent.flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
+                startActivity(globalIntent)
+
+                return@OnNavigationItemSelectedListener true
+            }
             else -> {
                 false
             }
@@ -92,7 +96,6 @@ class SearchNews : AppCompatActivity() {
         list_news.layoutManager = layoutManager
 
         dialog = SpotsDialog.Builder().setContext(this).build()
-
     }
 
     override fun onStart() {
@@ -113,7 +116,7 @@ class SearchNews : AppCompatActivity() {
 
         searchManager = getSystemService(Context.SEARCH_SERVICE) as SearchManager
         searchItem = menu?.findItem(R.id.search)!!
-        searchView = searchItem?.actionView as SearchView
+        searchView = searchItem.actionView as SearchView
 
         searchView.setSearchableInfo(searchManager.getSearchableInfo(componentName))
 

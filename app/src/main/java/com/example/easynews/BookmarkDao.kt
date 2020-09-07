@@ -1,4 +1,4 @@
-package com.example.easynews.`interface`
+package com.example.easynews
 
 import androidx.room.Dao
 import androidx.room.Delete
@@ -17,6 +17,6 @@ interface BookmarkDao {
     @Insert
     fun insertBookmark(bookmark: Bookmark)
 
-    @Delete
-    fun delete(bookmark: Bookmark)
+    @Query("DELETE FROM bookmark WHERE url LIKE :url")
+    fun deleteBookmark(url: String)
 }

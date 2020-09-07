@@ -15,7 +15,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".SearchNews"></activity>
+        <activity android:name=".Bookmarks"></activity>
+        <activity android:name=".SearchNews" />
         <activity android:name=".NewsDetails" />
         <activity android:name=".ListNews" />
         <activity android:name=".MainActivity">

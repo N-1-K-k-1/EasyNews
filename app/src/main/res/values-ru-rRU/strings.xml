@@ -15,4 +15,12 @@
     <string name="permission">Для отображения локальных новостей требуется разрешение</string>
     <string name="global_news_actionBar">Мировые новости</string>
     <string name="action_title">Новость</string>
+    <string name="no_bookmarks">Закладки не добавлены</string>
+    <string name="add_bookmark">Добавить в закладки</string>
+    <string name="share">Поделиться</string>
+    <string name="share_via">Поделиться через</string>
+    <string name="share_subject">Новость из приложения EasyNews</string>
+    <string name="share_body_template_first">Делюсь новостью:</string>
+    <string name="share_body_template_last">Отправлено с помощью приложения EasyNews</string>
+    <string name="failedToLoadLocal">Не удалось загрузить местные новости, может быть в вашем регионе не было найдено новостей</string>
 </resources>

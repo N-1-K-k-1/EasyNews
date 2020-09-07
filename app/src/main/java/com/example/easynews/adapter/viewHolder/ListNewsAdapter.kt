@@ -43,13 +43,13 @@ class ListNewsAdapter(private val context : Context, private val articleList: Mu
         }
 
         // Load image
-        Picasso.get()
-            .load(articleList[position].urlToImage)
-            .error(R.drawable.no_image_available)
-            .into(holder.articleImage, mImageCallback)
-
         if (!articleList[position].isImage) {
             Picasso.get().load(R.drawable.no_image_available).into(holder.articleImage)
+        } else {
+            Picasso.get()
+                .load(articleList[position].urlToImage)
+                .error(R.drawable.no_image_available)
+                .into(holder.articleImage, mImageCallback)
         }
 
         if (articleList[position].title!!.length > 65) {
@@ -75,6 +75,9 @@ class ListNewsAdapter(private val context : Context, private val articleList: Mu
             override fun onClick(view : View, position : Int) {
                 val detail = Intent(context, NewsDetails::class.java)
                 detail.putExtra("webUrl", articleList[position].url)
+                detail.putExtra("title", articleList[position].title)
+                detail.putExtra("publishedAt", articleList[position].publishedAt)
+                detail.putExtra("image", articleList[position].urlToImage)
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                     detail.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 }

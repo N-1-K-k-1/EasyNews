@@ -1,4 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <group
+        android:checkableBehavior="none">
+        <item
+            android:id="@+id/settings_control"
+            android:title="@string/settings"
+            android:icon="@drawable/ic_baseline_tune_24" />
+
+        <item
+            android:id="@+id/bookmarks_control"
+            android:title="@string/add_bookmark"
+            android:icon="@drawable/no_bookmark" />
+
+        <item
+            android:id="@+id/share_control"
+            android:title="@string/share"
+            android:icon="@drawable/ic_baseline_share_24" />
+    </group>
 </menu>
