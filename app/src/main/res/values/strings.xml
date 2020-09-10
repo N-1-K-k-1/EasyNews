@@ -27,4 +27,5 @@
     <string name="little_font">Little font</string>
     <string name="large_font">Large font</string>
     <string name="extra_font">Extra font</string>
+    <string name="not_found">No results were found for your search</string>
 </resources>

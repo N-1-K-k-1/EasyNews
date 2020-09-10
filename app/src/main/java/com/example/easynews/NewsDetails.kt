@@ -210,12 +210,21 @@ class NewsDetails : AppCompatActivity() {
         // Set the SeekBar initial progress from screen current brightness
         val brightness = brightness
         brightness_bar.progress = brightness
+    }
+
+    override fun onStart() {
+        super.onStart()
 
         // If app has no permission to write system settings
         if(!canWrite){
-            brightness_bar.visibility = View.GONE
+            bar_layout.visibility = View.GONE
             divider.visibility = View.GONE
+
             showAlertMsg()
+        }
+        else {
+            bar_layout.visibility = View.VISIBLE
+            divider.visibility = View.VISIBLE
         }
 
         // Set a SeekBar change listener

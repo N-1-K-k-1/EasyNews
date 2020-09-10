@@ -106,7 +106,39 @@ class GeoData(private val context: Context)  {
                     "Hong Kong" -> { return "hk" }
                     "Hungary" -> { return "hu" }
                     "Indonesia" -> { return "id" }
-                    else -> { return "gb" }
+                    "Ireland" -> { return "ie" }
+                    "Israel" -> { return "il" }
+                    "India" -> { return "in" }
+                    "Italy" -> { return "it" }
+                    "Japan" -> { return "jp" }
+                    "Korea" -> { return "kr" }
+                    "Lithuania" -> { return "lt" }
+                    "Latvia" -> { return "lv" }
+                    "Morocco" -> { return "ma" }
+                    "Mexico" -> { return "mx" }
+                    "Malaysia" -> { return "my" }
+                    "Nigeria" -> { return "ng" }
+                    "Netherlands" -> { return "nl" }
+                    "Norway" -> { return "no" }
+                    "New Zealand" -> { return "nz" }
+                    "Philippines" -> { return "ph" }
+                    "Poland" -> { return "pl" }
+                    "Portugal" -> { return "pt" }
+                    "Romania" -> { return "ro" }
+                    "Serbia" -> { return "rs" }
+                    "Saudi Arabia" -> { return "sa" }
+                    "Sweden" -> { return "se" }
+                    "Singapore" -> { return "sg" }
+                    "Slovenia" -> { return "si" }
+                    "Slovakia" -> { return "sk" }
+                    "Thailand" -> { return "th" }
+                    "Turkey" -> { return "tr" }
+                    "Taiwan" -> { return "tw" }
+                    "Ukraine" -> { return "ua" }
+                    "United States" -> { return "us" }
+                    "Venezuela" -> { return "ve" }
+                    "South Africa" -> { return "za" }
+                    else -> { return "us" }
                 }
         }
         else {

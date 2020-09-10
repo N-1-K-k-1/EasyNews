@@ -69,7 +69,8 @@
             android:layout_below="@id/diagonalLayout"
             android:id="@+id/list_news"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:layout_above="@+id/navigationView">
 
         </androidx.recyclerview.widget.RecyclerView>
 

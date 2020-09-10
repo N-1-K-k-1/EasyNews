@@ -148,6 +148,12 @@ class SearchNews : AppCompatActivity() {
                 override fun onResponse(call: Call<News>, response: Response<News>) {
                     var cnt = 0
 
+                    if (response.body()?.articles?.isEmpty()!!) {
+                        Toast.makeText(baseContext, getString(R.string.not_found), Toast.LENGTH_LONG).show()
+
+                        return
+                    }
+
                     lifecycleScope.executeAsyncTask(onPreExecute = {
                         // ... runs in Main Thread
                     }, doInBackground = {

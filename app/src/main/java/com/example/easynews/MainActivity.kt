@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.os.StrictMode
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
@@ -217,6 +218,15 @@ class MainActivity : AppCompatActivity() {
                                 var cnt = 0
                                 val regex = Regex(pattern = """\d+""")
 
+                                if (response.body()?.articles?.isEmpty()!!) {
+                                    no_news.visibility = View.VISIBLE
+
+                                    return
+                                }
+                                else {
+                                    no_news.visibility = View.INVISIBLE
+                                }
+
                                 lifecycleScope.executeAsyncTask(onPreExecute = {
                                     // ... runs in Main Thread
                                 }, doInBackground = {
@@ -281,7 +291,7 @@ class MainActivity : AppCompatActivity() {
                             }
 
                             override fun onFailure(call: Call<News>, t: Throwable) {
-                                Toast.makeText(baseContext, getString(R.string.failedToLoadLocal), Toast.LENGTH_LONG).show()
+                                Toast.makeText(baseContext, getString(R.string.failedToLoad), Toast.LENGTH_SHORT).show()
 
                                 dialog.dismiss()
                             }
@@ -301,6 +311,15 @@ class MainActivity : AppCompatActivity() {
                         override fun onResponse(call: Call<News>, response: Response<News>) {
                             var cnt = 0
                             val regex = Regex(pattern = """\d+""")
+
+                            if (response.body()?.articles?.isEmpty()!!) {
+                                no_news.visibility = View.VISIBLE
+
+                                return
+                            }
+                            else {
+                                no_news.visibility = View.INVISIBLE
+                            }
 
                             lifecycleScope.executeAsyncTask(onPreExecute = {
                                 // ... runs in Main Thread
@@ -363,7 +382,7 @@ class MainActivity : AppCompatActivity() {
                         }
 
                         override fun onFailure(call : Call<News>, t : Throwable) {
-                            Toast.makeText(baseContext, getString(R.string.failedToLoadLocal), Toast.LENGTH_LONG).show()
+                            Toast.makeText(baseContext, getString(R.string.failedToLoad), Toast.LENGTH_SHORT).show()
 
                             swipe_to_refresh.isRefreshing = false
                         }
