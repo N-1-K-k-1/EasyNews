@@ -1,12 +1,89 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/settings_control_panel"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical" >
-        <Button
+    android:layout_alignParentBottom="true"
+    android:layout_margin="0dp"
+    android:background="?android:attr/windowBackground"
+    android:translationZ="999dp"
+    android:visibility="invisible" >
+
+    <LinearLayout
+        android:id="@+id/font_size_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_margin="10dp"
+        android:weightSum="100" >
+        <ImageView
+            android:id="@+id/button_minus"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:src="@drawable/ic_baseline_remove_circle_outline_24"
+            tools:ignore="ContentDescription"
+            android:layout_weight="10"/>
+
+        <TextView
+            android:id="@+id/font_size_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Test" />
-</LinearLayout>
+            android:layout_weight="80"
+            android:textSize="18sp"
+            android:gravity="center" />
+
+        <ImageView
+            android:id="@+id/button_plus"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:src="@drawable/ic_baseline_add_circle_outline_24"
+            tools:ignore="ContentDescription"
+            android:layout_weight="10" />
+
+    </LinearLayout>
+
+    <View
+        style="@style/Divider"
+        android:id="@+id/divider"
+        android:layout_below="@id/font_size_layout"
+        android:layout_marginTop="10dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp" />
+
+    <LinearLayout
+        android:id="@+id/bar_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/divider"
+        android:layout_margin="10dp"
+        android:orientation="horizontal"
+        android:weightSum="100">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="10"
+            android:src="@drawable/ic_baseline_brightness_low_24"
+            tools:ignore="ContentDescription" />
+
+        <SeekBar
+            android:id="@+id/brightness_bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="80"
+            android:max="255"
+            android:padding="3dp" />
+
+        <ImageView
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_weight="10"
+            android:layout_marginTop="-4dp"
+            android:src="@drawable/ic_baseline_brightness_high_24"
+            tools:ignore="ContentDescription" />
+
+    </LinearLayout>
+
+</RelativeLayout>

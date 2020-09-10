@@ -5,7 +5,6 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.os.StrictMode
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
@@ -26,13 +25,6 @@ import com.squareup.picasso.Picasso
 import dmax.dialog.SpotsDialog
 import io.paperdb.Paper
 import kotlinx.android.synthetic.main.activity_list_news.*
-import kotlinx.android.synthetic.main.activity_list_news.diagonalLayout
-import kotlinx.android.synthetic.main.activity_list_news.list_news
-import kotlinx.android.synthetic.main.activity_list_news.swipe_to_refresh
-import kotlinx.android.synthetic.main.activity_list_news.top_author
-import kotlinx.android.synthetic.main.activity_list_news.top_image
-import kotlinx.android.synthetic.main.activity_list_news.top_title
-import kotlinx.android.synthetic.main.activity_main.*
 import retrofit2.Call
 import retrofit2.Response
 import java.io.IOException

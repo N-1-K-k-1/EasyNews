@@ -2,27 +2,32 @@ package com.example.easynews
 
 import android.annotation.SuppressLint
 import android.app.AlertDialog
+import android.content.Context
 import android.content.Intent
+import android.graphics.Rect
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
-import android.view.Menu
-import android.view.MenuItem
-import android.view.View
-import android.view.ViewGroup
-import android.view.ViewTreeObserver.OnGlobalLayoutListener
-import android.view.animation.Animation
-import android.view.animation.Animation.AnimationListener
-import android.view.animation.AnimationUtils
+import android.provider.Settings
+import android.view.*
 import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import android.widget.SeekBar
+import android.widget.TextView
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import androidx.transition.Slide
+import androidx.transition.Transition
+import androidx.transition.TransitionManager
 import com.example.easynews.common.AppDatabase
 import com.example.easynews.model.Bookmark
 import com.example.easynews.network.AsyncTask.executeAsyncTask
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import dmax.dialog.SpotsDialog
+import io.paperdb.Paper
+import kotlinx.android.synthetic.main.settings_control_layout.*
 import org.adblockplus.libadblockplus.android.webview.AdblockWebView
 
 
@@ -35,25 +40,19 @@ class NewsDetails : AppCompatActivity() {
     private lateinit var menuItem: MenuItem
     private lateinit var db: AppDatabase
     private lateinit var adblockWebView: AdblockWebView
-    private lateinit var hiddenPanel: ViewGroup
-    private lateinit var webPage: ViewGroup
+    private lateinit var hiddenPanel: View
     private lateinit var root: ViewGroup
+    private lateinit var settingsControlPanel: View
+    private lateinit var transition: Transition
+    private lateinit var fontSizeText: TextView
 
-    private var isPanelShown = false
+    private var isPanelShown = true
     private var isChecked = false
-    private var screenHeight = 0
 
     private val navListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
         when (item.itemId) {
             R.id.settings_control -> {
-               /* when (adblockWebView.settings.textZoom) {
-                    100 -> adblockWebView.settings.textZoom = 120
-                    120 -> adblockWebView.settings.textZoom = 140
-                    140 -> adblockWebView.settings.textZoom = 160
-                    160 -> adblockWebView.settings.textZoom = 180
-                    180 -> adblockWebView.settings.textZoom = 200
-                }*/
-                slideUpDown()
+                toggle(isPanelShown)
 
                 return@OnNavigationItemSelectedListener true
             }
@@ -73,7 +72,7 @@ class NewsDetails : AppCompatActivity() {
         }
     }
 
-    @SuppressLint("SetJavaScriptEnabled")
+    @SuppressLint("SetJavaScriptEnabled", "ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_news_details)
@@ -103,7 +102,7 @@ class NewsDetails : AppCompatActivity() {
         /* Checking bookmarks */
         checkBookmarks()
 
-        //WebView
+        /* WebView */
         adblockWebView = findViewById(R.id.webView)
         adblockWebView.settings.javaScriptEnabled = true
         adblockWebView.webChromeClient = WebChromeClient()
@@ -118,22 +117,133 @@ class NewsDetails : AppCompatActivity() {
                 adblockWebView.loadUrl(intent.getStringExtra("webUrl")!!)
         }
 
-        webPage = findViewById(R.id.webView)
-        root = findViewById(R.id.web)
-        val vto = webPage.viewTreeObserver
-        vto.addOnGlobalLayoutListener(object : OnGlobalLayoutListener {
-            override fun onGlobalLayout() {
-                screenHeight = webPage.height
-                webPage.viewTreeObserver.removeOnGlobalLayoutListener(this)
-            }
-        })
 
-        hiddenPanel = layoutInflater.inflate(R.layout.settings_control_layout, root, false) as ViewGroup
-        hiddenPanel.visibility = View.INVISIBLE
+        /* Creating settings_control_panel View */
+        root = findViewById(R.id.web)
+        hiddenPanel = layoutInflater.inflate(R.layout.settings_control_layout, root, false)
         root.addView(hiddenPanel)
 
+        root.setOnClickListener { toggle(true) }
 
-        isPanelShown = false
+        settingsControlPanel = findViewById(R.id.settings_control_panel)
+        transition = Slide(Gravity.BOTTOM)
+
+        fontSizeText = findViewById(R.id.font_size_text)
+        // Changing font size
+        val cache = Paper.book().read<Int>("fontSizeCache")
+        if (cache != null && cache != 0) {
+            when (cache) {
+                70 -> {
+                    fontSizeText.text = getString(R.string.little_font)
+                    fontSizeText.textSize = 16F
+                    fontSizeText.setPadding(0,5,0,0)
+                    adblockWebView.settings.textZoom = 70
+                }
+                100 -> {
+                    fontSizeText.text = getString(R.string.normal_font)
+                    fontSizeText.textSize = 18F
+                    adblockWebView.settings.textZoom = 100
+                }
+                130 -> {
+                    fontSizeText.text = getString(R.string.large_font)
+                    fontSizeText.textSize = 20F
+                    adblockWebView.settings.textZoom = 130
+                }
+                160 -> {
+                    fontSizeText.text = getString(R.string.extra_font)
+                    fontSizeText.textSize = 22F
+                    adblockWebView.settings.textZoom = 160
+                }
+            }
+            adblockWebView.settings.textZoom = cache
+        }
+        else {
+            fontSizeText.text = getString(R.string.normal_font)
+        }
+        hiddenPanel.findViewById<View>(R.id.button_minus).setOnClickListener {
+            when (adblockWebView.settings.textZoom) {
+                100 -> {
+                    fontSizeText.text = getString(R.string.little_font)
+                    fontSizeText.textSize = 16F
+                    fontSizeText.setPadding(0,5,0,0)
+                    adblockWebView.settings.textZoom = 70
+                    Paper.book().write("fontSizeCache", adblockWebView.settings.textZoom)
+                }
+                130 -> {
+                    fontSizeText.text = getString(R.string.normal_font)
+                    fontSizeText.textSize = 18F
+                    adblockWebView.settings.textZoom = 100
+                    Paper.book().write("fontSizeCache", adblockWebView.settings.textZoom)
+                }
+                160 -> {
+                    fontSizeText.text = getString(R.string.large_font)
+                    fontSizeText.textSize = 20F
+                    adblockWebView.settings.textZoom = 130
+                    Paper.book().write("fontSizeCache", adblockWebView.settings.textZoom)
+                }
+            }
+        }
+        hiddenPanel.findViewById<View>(R.id.button_plus).setOnClickListener {
+            when (adblockWebView.settings.textZoom) {
+                70 -> {
+                    fontSizeText.text = getString(R.string.normal_font)
+                    fontSizeText.textSize = 18F
+                    fontSizeText.setPadding(0,0,0,0)
+                    adblockWebView.settings.textZoom = 100
+                    Paper.book().write("fontSizeCache", adblockWebView.settings.textZoom)
+                }
+                100 -> {
+                    fontSizeText.text = getString(R.string.large_font)
+                    fontSizeText.textSize = 20F
+                    adblockWebView.settings.textZoom = 130
+                    Paper.book().write("fontSizeCache", adblockWebView.settings.textZoom)
+                }
+                130 -> {
+                    fontSizeText.text = getString(R.string.extra_font)
+                    fontSizeText.textSize = 22F
+                    adblockWebView.settings.textZoom = 160
+                    Paper.book().write("fontSizeCache", adblockWebView.settings.textZoom)
+                }
+            }
+        }
+
+        // Set the SeekBar initial progress from screen current brightness
+        val brightness = brightness
+        brightness_bar.progress = brightness
+
+        // If app has no permission to write system settings
+        if(!canWrite){
+            brightness_bar.visibility = View.GONE
+            divider.visibility = View.GONE
+            showAlertMsg()
+        }
+
+        // Set a SeekBar change listener
+        brightness_bar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar, i: Int, b: Boolean) {
+                // Change the screen brightness
+                if (canWrite){
+                    setBrightness(i)
+                }
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar) {
+
+            }
+
+            override fun onStopTrackingTouch(seekBar: SeekBar) {
+
+            }
+        })
+    }
+
+    override fun dispatchTouchEvent(event: MotionEvent): Boolean {
+        if (event.action == MotionEvent.ACTION_UP) {
+            if (!inViewInBounds(settingsControlPanel, event.rawX.toInt(), event.rawY.toInt())) {
+                toggle(false)
+            }
+        }
+        return super.dispatchTouchEvent(event)
     }
 
     private fun addToBookmarks() {
@@ -181,6 +291,7 @@ class NewsDetails : AppCompatActivity() {
             lifecycleScope.executeAsyncTask(onPreExecute = {
                 // ... runs in Main Thread
             }, doInBackground = {
+                @Suppress("SENSELESS_COMPARISON")
                 if (db.bookmarkDao().findByUrl(intent.getStringExtra("webUrl")!!) != null) {
                     bottomNav.menu.findItem(R.id.bookmarks_control).setIcon(R.drawable.ic_baseline_bookmark_24)
                     isChecked = true
@@ -205,62 +316,71 @@ class NewsDetails : AppCompatActivity() {
         startActivity(Intent.createChooser(sharingIntent, getString(R.string.share_via)))
     }
 
-    fun slideUpDown() {
-        if (!isPanelShown) {
-            // Show the panel
-            webPage.layout(
-                webPage.left,
-                webPage.top - screenHeight * 25 / 100,
-                webPage.right,
-                webPage.bottom - screenHeight * 25 / 100
-            )
-            hiddenPanel.layout(
-                webPage.left,
-                webPage.bottom,
-                webPage.right,
-                screenHeight
-            )
-            hiddenPanel.visibility = View.VISIBLE
-            val bottomUp: Animation = AnimationUtils.loadAnimation(
-                this,
-                R.anim.bottom_up
-            )
-            hiddenPanel.startAnimation(bottomUp)
-            isPanelShown = true
-        } else {
-            isPanelShown = false
-
-            // Hide the Panel
-            val bottomDown: Animation = AnimationUtils.loadAnimation(
-                this,
-                R.anim.bottom_down
-            )
-            bottomDown.setAnimationListener(object : AnimationListener {
-                override fun onAnimationStart(arg0: Animation) {
-                    // TODO Auto-generated method stub
-                }
-
-                override fun onAnimationRepeat(arg0: Animation) {
-                    // TODO Auto-generated method stub
-                }
-
-                override fun onAnimationEnd(arg0: Animation) {
-                    isPanelShown = false
-                    webPage.layout(
-                        webPage.left,
-                        webPage.top + screenHeight * 25 / 100,
-                        webPage.right,
-                        webPage.bottom + screenHeight * 25 / 100
-                    )
-                    hiddenPanel.layout(
-                        webPage.left,
-                        webPage.bottom,
-                        webPage.right,
-                        screenHeight
-                    )
-                }
-            })
-            hiddenPanel.startAnimation(bottomDown)
-        }
+    private fun toggle(show: Boolean) {
+        isPanelShown = !show
+        transition.duration = 200
+        transition.addTarget(R.id.settings_control_panel)
+        TransitionManager.beginDelayedTransition(root, transition)
+        settingsControlPanel.visibility = if (show) View.VISIBLE else View.GONE
     }
+
+    private fun inViewInBounds(view: View, x: Int, y: Int): Boolean {
+        val outRect = Rect()
+        val location = IntArray(2)
+        view.getDrawingRect(outRect)
+        view.getLocationOnScreen(location)
+        outRect.offset(location[0], location[1])
+        return outRect.contains(x, y)
+    }
+
+    // Extension property to get write system settings permission status
+    val Context.canWrite:Boolean
+        get() {
+            return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                Settings.System.canWrite(this)
+            }else{
+                true
+            }
+        }
+
+
+    // Extension property to get screen brightness programmatically
+    private val Context.brightness: Int
+        get() {
+            return Settings.System.getInt(
+                this.contentResolver,
+                Settings.System.SCREEN_BRIGHTNESS,
+                0
+            )
+        }
+
+
+    // Extension method to set screen brightness programmatically
+    fun Context.setBrightness(value:Int) {
+        Settings.System.putInt(
+            this.contentResolver,
+            Settings.System.SCREEN_BRIGHTNESS,
+            value
+        )
+    }
+
+    private fun showAlertMsg() {
+        val dialog = AlertDialog.Builder(this)
+        dialog.setMessage(getString(R.string.write_permission))
+        dialog.setPositiveButton("Settings") { _, _ ->
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                val intent = Intent(
+                    Settings.ACTION_MANAGE_WRITE_SETTINGS,
+                    Uri.parse("package:$packageName")
+                )
+                startActivity(intent)
+            }
+        }
+        dialog.setNegativeButton(getString(R.string.cancel)) { _, _ ->
+            finish()
+        }
+        dialog.setCancelable(false)
+        dialog.show()
+    }
+
 }

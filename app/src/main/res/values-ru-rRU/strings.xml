@@ -23,4 +23,9 @@
     <string name="share_body_template_first">Делюсь новостью:</string>
     <string name="share_body_template_last">Отправлено с помощью приложения EasyNews</string>
     <string name="failedToLoadLocal">Не удалось загрузить местные новости, может быть в вашем регионе не было найдено новостей</string>
+    <string name="normal_font">Обычный шрифт</string>
+    <string name="little_font">Маленький шрифт</string>
+    <string name="large_font">Большой шрифт</string>
+    <string name="extra_font">Огромный шрифт</string>
+    <string name="write_permission">Пожалуйста, разрешите изменение системных настроек, чтобы менять яркость дисплея</string>
 </resources>

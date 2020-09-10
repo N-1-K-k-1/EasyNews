@@ -14,6 +14,7 @@
     <string name="title">Title</string>
     <string name="author">Author</string>
     <string name="permission">Permission is required to display local news</string>
+    <string name="write_permission">Please, grant write settings permission in order to change screen brightness</string>
     <string name="action_title">News</string>
     <string name="no_bookmarks">No bookmarks</string>
     <string name="add_bookmark">Add to bookmarks</string>
@@ -22,4 +23,8 @@
     <string name="share_subject">News from EasyNews app</string>
     <string name="share_body_template_first">Watch this news:</string>
     <string name="share_body_template_last">Sent via EasyNews app</string>
+    <string name="normal_font">Normal font</string>
+    <string name="little_font">Little font</string>
+    <string name="large_font">Large font</string>
+    <string name="extra_font">Extra font</string>
 </resources>
