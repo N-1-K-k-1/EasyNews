@@ -26,7 +26,6 @@
 <a name="screenshots"></a>
 ## Screenshots
 
-#### Light Theme
 <table style="width:100%">
   <tr>
     <th>1. Local news</th>
