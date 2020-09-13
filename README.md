@@ -36,11 +36,11 @@
     <th>5. News details</th>
   </tr>
   <tr>
-    <td><img src="https://github.com/N-1-K-k-1/EasyNews/screenshots/1.png"/></td>
-    <td><img src="https://github.com/N-1-K-k-1/EasyNews/screenshots/2.png"/></td>
-    <td><img src="https://github.com/N-1-K-k-1/EasyNews/screenshots/3.png"/></td>
-    <td><img src="https://github.com/N-1-K-k-1/EasyNews/screenshots/4.png"/></td>
-    <td><img src="https://github.com/N-1-K-k-1/EasyNews/screenshots/5.png"/></td>
+    <td><img src="https://github.com/N-1-K-k-1/EasyNews/blob/master/screenshots/1.png"/></td>
+    <td><img src="https://github.com/N-1-K-k-1/EasyNews/blob/master/screenshots/2.png"/></td>
+    <td><img src="https://github.com/N-1-K-k-1/EasyNews/blob/master/screenshots/3.png"/></td>
+    <td><img src="https://github.com/N-1-K-k-1/EasyNews/blob/master/screenshots/4.png"/></td>
+    <td><img src="https://github.com/N-1-K-k-1/EasyNews/blob/master/screenshots/5.png"/></td>
   </tr>
    </table>
 
