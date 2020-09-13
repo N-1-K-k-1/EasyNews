@@ -30,7 +30,6 @@ import io.paperdb.Paper
 import kotlinx.android.synthetic.main.settings_control_layout.*
 import org.adblockplus.libadblockplus.android.webview.AdblockWebView
 
-
 class NewsDetails : AppCompatActivity() {
 
     private lateinit var dialog : AlertDialog
