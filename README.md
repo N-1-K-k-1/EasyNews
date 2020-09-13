@@ -86,7 +86,7 @@ You'll need to provide API key to fetch the news from the News Service (API). Cu
 
 MIT License
 ```
-Copyright (c) [2020] [TEKOMBO Gabriel]
+Copyright (c) [2020] [Viacheslav Proshkin]
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights
