@@ -19,6 +19,8 @@
     - Publication Date
 - Using News API to retrieve news that matches the search
 - Open news links via WebView
+- Change brightness and font in WebView
+- Share links to news
 - Save/Delete Bookmarks in database with Room
 
 <a name="screenshots"></a>
@@ -34,11 +36,11 @@
     <th>5. News details</th>
   </tr>
   <tr>
-    <td><img src="https://github.com/gabriel-TheCode/AndroidLibrariesAssets/raw/master/Infotify/4.jpg"/></td>
-    <td><img src="https://github.com/gabriel-TheCode/AndroidLibrariesAssets/raw/master/Infotify/1.jpg"/></td>
-    <td><img src="https://github.com/gabriel-TheCode/AndroidLibrariesAssets/raw/master/Infotify/2.jpg"/></td>
-    <td><img src="https://github.com/gabriel-TheCode/AndroidLibrariesAssets/raw/master/Infotify/3.jpg"/></td>
-    <td><img src="https://github.com/gabriel-TheCode/AndroidLibrariesAssets/raw/master/Infotify/3.jpg"/></td>
+    <td><img src="https://github.com/N-1-K-k-1/EasyNews/screenshots/1.png"/></td>
+    <td><img src="https://github.com/N-1-K-k-1/EasyNews/screenshots/2.png"/></td>
+    <td><img src="https://github.com/N-1-K-k-1/EasyNews/screenshots/3.png"/></td>
+    <td><img src="https://github.com/N-1-K-k-1/EasyNews/screenshots/4.png"/></td>
+    <td><img src="https://github.com/N-1-K-k-1/EasyNews/screenshots/5.png"/></td>
   </tr>
    </table>
 
