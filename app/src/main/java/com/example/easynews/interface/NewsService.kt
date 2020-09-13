@@ -21,7 +21,7 @@ interface NewsService {
     fun getNewsFromSearch(@Query("q") searchValue: String): Call<News>
 
     companion object {
-        const val domains: String  = "paperpaper.ru, life.ru, fontanka.ru, www.rbc.ru, lenta.ru, russian.rt.com, izvestia.ru, vz.ru, mk.ru, dni.ru, " +
+        const val domains: String  = "paperpaper.ru, vesti.ru, life.ru, fontanka.ru, www.rbc.ru, lenta.ru, russian.rt.com, izvestia.ru, vz.ru, mk.ru, dni.ru, " +
                 "newsru.com, meduza.io, ria.ru, vedomosti.ru, gazeta.ru, topnews.ru, rg.ru, kp.ru, regnum.ru, m24.ru, " +
                 "forbes.ru, bbc.co.uk, abcnews.go.com, abc.net.au, aftenposten.no, aljazeera.com, ansa.it, argaam.com, arstechnica.com, " +
                 "arynews.tv, apnews.com, afr.com, axios.com, bild.de, br.blastingnews.com, bleacherreport.com, bloomberg.com, businessinsider.com, " +

@@ -52,6 +52,18 @@ class NewsDetails : AppCompatActivity() {
     private val navListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
         when (item.itemId) {
             R.id.settings_control -> {
+                // If app has no permission to write system settings
+                if(!canWrite){
+                    bar_layout.visibility = View.GONE
+                    divider.visibility = View.GONE
+
+                    showAlertMsg()
+                }
+                else {
+                    bar_layout.visibility = View.VISIBLE
+                    divider.visibility = View.VISIBLE
+                }
+
                 toggle(isPanelShown)
 
                 return@OnNavigationItemSelectedListener true
@@ -219,8 +231,6 @@ class NewsDetails : AppCompatActivity() {
         if(!canWrite){
             bar_layout.visibility = View.GONE
             divider.visibility = View.GONE
-
-            showAlertMsg()
         }
         else {
             bar_layout.visibility = View.VISIBLE
@@ -327,6 +337,8 @@ class NewsDetails : AppCompatActivity() {
 
     private fun toggle(show: Boolean) {
         isPanelShown = !show
+        if (show)
+            hiddenPanel.minimumHeight = bottomNav.height
         transition.duration = 200
         transition.addTarget(R.id.settings_control_panel)
         TransitionManager.beginDelayedTransition(root, transition)
@@ -343,11 +355,11 @@ class NewsDetails : AppCompatActivity() {
     }
 
     // Extension property to get write system settings permission status
-    val Context.canWrite:Boolean
+    val Context.canWrite: Boolean
         get() {
             return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 Settings.System.canWrite(this)
-            }else{
+            } else {
                 true
             }
         }
@@ -386,7 +398,7 @@ class NewsDetails : AppCompatActivity() {
             }
         }
         dialog.setNegativeButton(getString(R.string.cancel)) { _, _ ->
-            finish()
+            return@setNegativeButton
         }
         dialog.setCancelable(false)
         dialog.show()

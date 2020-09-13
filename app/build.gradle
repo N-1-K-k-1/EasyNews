@@ -11,7 +11,7 @@ android {
     defaultConfig {
         applicationId "com.example.easynews"
         minSdkVersion 23
-        targetSdkVersion 30
+        targetSdkVersion 27
         versionCode 1
         versionName "1.0"
 
