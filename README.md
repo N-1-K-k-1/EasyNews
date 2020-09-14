@@ -1,6 +1,6 @@
 # EasyNews
 [![platform](https://img.shields.io/badge/platform-Android-yellow.svg)](https://www.android.com)
-[![API](https://img.shields.io/badge/API-21%2B-brightgreen.svg?style=plastic)](https://android-arsenal.com/api?level=21)
+[![API](https://img.shields.io/badge/API-23%2B-brightgreen.svg?style=plastic)](https://android-arsenal.com/api?level=23)
 [![License: MIT](https://img.shields.io/badge/License-MIT-red.svg)](https://opensource.org/licenses/MIT)
 
  EasyNews is a newsfeed app that allows you to read, and share the news from your location (town) or from the other world. 
@@ -19,12 +19,13 @@
     - Publication Date
 - Using News API to retrieve news that matches the search
 - Open news links via WebView
+- Change brightness and font in WebView
+- Share links to news
 - Save/Delete Bookmarks in database with Room
 
 <a name="screenshots"></a>
 ## Screenshots
 
-#### Light Theme
 <table style="width:100%">
   <tr>
     <th>1. Local news</th>
@@ -34,11 +35,11 @@
     <th>5. News details</th>
   </tr>
   <tr>
-    <td><img src="https://github.com/gabriel-TheCode/AndroidLibrariesAssets/raw/master/Infotify/4.jpg"/></td>
-    <td><img src="https://github.com/gabriel-TheCode/AndroidLibrariesAssets/raw/master/Infotify/1.jpg"/></td>
-    <td><img src="https://github.com/gabriel-TheCode/AndroidLibrariesAssets/raw/master/Infotify/2.jpg"/></td>
-    <td><img src="https://github.com/gabriel-TheCode/AndroidLibrariesAssets/raw/master/Infotify/3.jpg"/></td>
-    <td><img src="https://github.com/gabriel-TheCode/AndroidLibrariesAssets/raw/master/Infotify/3.jpg"/></td>
+    <td><img src="https://github.com/N-1-K-k-1/EasyNews/blob/master/screenshots/1.png"/></td>
+    <td><img src="https://github.com/N-1-K-k-1/EasyNews/blob/master/screenshots/2.png"/></td>
+    <td><img src="https://github.com/N-1-K-k-1/EasyNews/blob/master/screenshots/3.png"/></td>
+    <td><img src="https://github.com/N-1-K-k-1/EasyNews/blob/master/screenshots/4.png"/></td>
+    <td><img src="https://github.com/N-1-K-k-1/EasyNews/blob/master/screenshots/5.png"/></td>
   </tr>
    </table>
 
@@ -85,7 +86,7 @@ You'll need to provide API key to fetch the news from the News Service (API). Cu
 
 MIT License
 ```
-Copyright (c) [2020] [TEKOMBO Gabriel]
+Copyright (c) [2020] [Viacheslav Proshkin]
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights
