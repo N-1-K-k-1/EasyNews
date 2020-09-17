@@ -69,8 +69,7 @@
 ## Installation
 
 - Clone the app and import to Android Studio.
-``git clone https://github.com/N-1-K-k-1/EasyNews.git``
-- Set your API key  
+``git clone https://github.com/N-1-K-k-1/EasyNews.git``  
 You'll need to provide API key to fetch the news from the News Service (API). Currently the news is fetched from [NewsAPI](https://newsapi.org/)
 - Generate an API key (It's only 2 steps!) from [NewsAPI](https://newsapi.org/)
 - Go to file /interface/NewsService.kt in our project root folder
