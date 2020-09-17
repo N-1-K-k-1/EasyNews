@@ -140,6 +140,11 @@ class MainActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
 
+        if (!GeoData.locationPermission) {
+            geoData.checkLocation()
+            loadLocalNews(false)
+        }
+
         /* Changing menu item */
         menuItem = menu.getItem(0)
         menuItem.isChecked = true
@@ -258,11 +263,18 @@ class MainActivity : AppCompatActivity() {
                                 val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
                                 StrictMode.setThreadPolicy(policy)
 
-                                try {
-                                    URL(response.body()?.articles?.get(0)?.urlToImage).readBytes()
-                                } catch (e: IOException) {
-                                    Picasso.get().load(R.drawable.no_image_available).into(top_image)
-                                }
+                                lifecycleScope.executeAsyncTask(onPreExecute = {
+                                    // ... runs in Main Thread
+                                }, doInBackground = {
+                                    try {
+                                        URL(response.body()?.articles?.get(0)?.urlToImage).readBytes()
+                                    } catch (e: IOException) {
+                                        Picasso.get().load(R.drawable.no_image_available).into(top_image)
+                                    }
+                                }, onPostExecute = { it ->
+                                    // runs in Main Thread
+                                    // ... here "it" is the data returned from "doInBackground"
+                                })
 
                                 top_title.text = response.body()!!.articles!![0].title
 
@@ -350,11 +362,19 @@ class MainActivity : AppCompatActivity() {
                                 .load(response.body()?.articles?.get(0)?.urlToImage)
                                 .into(top_image)
 
-                            try {
-                                URL(response.body()?.articles?.get(0)?.urlToImage).readBytes()
-                            } catch (e: IOException) {
-                                Picasso.get().load(R.drawable.no_image_available).into(top_image)
-                            }
+
+                            lifecycleScope.executeAsyncTask(onPreExecute = {
+                                // ... runs in Main Thread
+                            }, doInBackground = {
+                                try {
+                                    URL(response.body()?.articles?.get(0)?.urlToImage).readBytes()
+                                } catch (e: IOException) {
+                                    Picasso.get().load(R.drawable.no_image_available).into(top_image)
+                                }
+                            }, onPostExecute = { it ->
+                                // runs in Main Thread
+                                // ... here "it" is the data returned from "doInBackground"
+                            })
 
                             top_title.text = response.body()!!.articles!![0].title
 

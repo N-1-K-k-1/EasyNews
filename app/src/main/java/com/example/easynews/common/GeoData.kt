@@ -174,13 +174,18 @@ class GeoData(private val context: Context)  {
     }
 
     fun checkPermissions(): Boolean {
-        return ActivityCompat.checkSelfPermission(
-            context,
-            Manifest.permission.ACCESS_FINE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-            context,
-            Manifest.permission.ACCESS_COARSE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED
+
+        return if (ActivityCompat.checkSelfPermission(
+                context,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                context,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED) {
+            locationPermission = true
+            true
+        } else
+            false
     }
 
     private fun getLocationUpdates() {
@@ -188,7 +193,7 @@ class GeoData(private val context: Context)  {
         locationRequest.interval = 50000
         locationRequest.fastestInterval = 50000
         locationRequest.smallestDisplacement = 170f //170 m = 0.1 mile
-        locationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY //according to your app
+        locationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY //according to app
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult?) {
                 locationResult ?: return
@@ -212,6 +217,10 @@ class GeoData(private val context: Context)  {
     // Stop location updates
     private fun stopLocationUpdates() {
         fusedLocationClient.removeLocationUpdates(locationCallback)
+    }
+
+    companion object {
+        @JvmStatic var locationPermission = false
     }
 }
 

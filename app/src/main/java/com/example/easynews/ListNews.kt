@@ -25,6 +25,13 @@ import com.squareup.picasso.Picasso
 import dmax.dialog.SpotsDialog
 import io.paperdb.Paper
 import kotlinx.android.synthetic.main.activity_list_news.*
+import kotlinx.android.synthetic.main.activity_list_news.diagonalLayout
+import kotlinx.android.synthetic.main.activity_list_news.list_news
+import kotlinx.android.synthetic.main.activity_list_news.swipe_to_refresh
+import kotlinx.android.synthetic.main.activity_list_news.top_author
+import kotlinx.android.synthetic.main.activity_list_news.top_image
+import kotlinx.android.synthetic.main.activity_list_news.top_title
+import kotlinx.android.synthetic.main.activity_main.*
 import retrofit2.Call
 import retrofit2.Response
 import java.io.IOException
@@ -195,11 +202,18 @@ class ListNews : AppCompatActivity() {
                             val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
                             StrictMode.setThreadPolicy(policy)
 
-                            try {
-                                URL(response.body()?.articles?.get(0)?.urlToImage).readBytes()
-                            } catch (e: IOException) {
-                                Picasso.get().load(R.drawable.no_image_available).into(top_image)
-                            }
+                            lifecycleScope.executeAsyncTask(onPreExecute = {
+                                // ... runs in Main Thread
+                            }, doInBackground = {
+                                try {
+                                    URL(response.body()?.articles?.get(0)?.urlToImage).readBytes()
+                                } catch (e: IOException) {
+                                    Picasso.get().load(R.drawable.no_image_available).into(top_image)
+                                }
+                            }, onPostExecute = { it ->
+                                // runs in Main Thread
+                                // ... here "it" is the data returned from "doInBackground"
+                            })
 
                             top_title.text = response.body()!!.articles!![0].title
 
@@ -276,11 +290,18 @@ class ListNews : AppCompatActivity() {
                             .load(response.body()?.articles?.get(0)?.urlToImage)
                             .into(top_image)
 
-                        try {
-                            URL(response.body()?.articles?.get(0)?.urlToImage).readBytes()
-                        } catch (e: IOException) {
-                            Picasso.get().load(R.drawable.no_image_available).into(top_image)
-                        }
+                        lifecycleScope.executeAsyncTask(onPreExecute = {
+                            // ... runs in Main Thread
+                        }, doInBackground = {
+                            try {
+                                URL(response.body()?.articles?.get(0)?.urlToImage).readBytes()
+                            } catch (e: IOException) {
+                                Picasso.get().load(R.drawable.no_image_available).into(top_image)
+                            }
+                        }, onPostExecute = { it ->
+                            // runs in Main Thread
+                            // ... here "it" is the data returned from "doInBackground"
+                        })
 
                         top_title.text = response.body()!!.articles!![0].title
 
